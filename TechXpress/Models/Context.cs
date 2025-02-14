@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace TechXpress.Models
 {
-    public class Context : DbContext
+    public class Context : IdentityDbContext<Users>
     {
        public Context(DbContextOptions<Context> options) : base(options) { }
        public DbSet<Users> Users { get; set; }
