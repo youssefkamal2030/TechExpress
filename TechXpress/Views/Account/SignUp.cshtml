@@ -1,7 +1,36 @@
-﻿
+﻿@model TechXpress.Models.Users
+
 @{
-    ViewData["Title"] = "SignUp";
+    ViewData["Title"] = "Sign Up";
 }
 
-<h1>SignUp</h1>
+<h1>Sign Up</h1>
+
+<!-- Sign Up Form -->
+<form asp-action="SignUp" method="post">
+    <div class="form-group">
+        <label asp-for="UserName" class="control-label"></label>
+        <input asp-for="UserName" class="form-control" />
+        <span asp-validation-for="UserName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Email" class="control-label"></label>
+        <input asp-for="Email" type="email" class="form-control" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Password" class="control-label"></label>
+        <input asp-for="Password" type="password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mt-3">
+        <input type="submit" value="Sign Up" class="btn btn-success" />
+        <!-- Link to Sign In page -->
+        <a class="btn btn-secondary" asp-action="SignIn">Already have an account? Sign In</a>
+    </div>
+</form>
+
 

@@ -11,7 +11,7 @@ namespace TechXpress.Repositories
         public ProductsRepo Products { get; }
         public OrdersRepo Orders { get; }
         public OrdersDetailsRepo OrdersDetails { get; }
-        public UsersRepo Users { get; }
+      
 
         public UnitOfWork(Context context, UserManager<Users> userManager)
         {
@@ -20,7 +20,7 @@ namespace TechXpress.Repositories
             Products = new ProductsRepo(context);
             Orders = new OrdersRepo(context);
             OrdersDetails = new OrdersDetailsRepo(context);
-            Users = new UsersRepo(userManager);
+           
         }
 
         public void Save()

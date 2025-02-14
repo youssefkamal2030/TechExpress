@@ -1,15 +1,30 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model TechXpress.Models.Users
+
 @{
+    ViewData["Title"] = "Sign In";
 }
 
-<div>
-    <form asp-action="SingIn" >
-        <option>Name</option>
-        <input />
-        <option>Password</option>
-        <input />
-        
-    </form>
-</div>
+<h1>Sign In</h1>
+
+<form asp-action="SignIn" asp-controller="Account" method="post">
+    
+    <div class="form-group" asp-validation-summary="All">
+        <span asp-validation-for="Email" class="text-danger"></span>
+        <label asp-for="Email" class="control-label"></label>
+        <input asp-for="Email" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Password" class="control-label"></label>
+        <input asp-for="Password" type="password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mt-3">
+        <input type="submit" value="Sign In" class="btn btn-primary" />
+     
+        <a class="btn btn-secondary" asp-action="SignUp">Sign Up</a>
+    </div>
+</form>
+
+
