@@ -7,5 +7,11 @@ namespace TechXpress.Repositories
         public ProductsRepo(Context context) : base(context)
         {
         }
-    }   
+        public List<Products> Get_Products_by_Category(int categoryID)
+        {
+
+            return _context.Products.Where(p => p.CategoryID == categoryID).ToList();
+
+        }
+    }
 }

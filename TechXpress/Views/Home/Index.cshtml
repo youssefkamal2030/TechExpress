@@ -1,8 +1,40 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IEnumerable<TechXpress.Models.Categories>
+
+@{
+    ViewData["Title"] = "Categories";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<h1>Categories</h1>
+
+<a class="btn btn-primary" asp-action="Create" asp-controller="Categories">Create New</a>
+
+@if (Model == null || !Model.Any())
+{
+    <p class="text-danger">No categories found.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Category ID</th>
+                <th>Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.CategoryID</td>
+                    <td>@item.CategoryName</td>
+                    <td>
+                        <a class="btn btn-warning btn-sm" asp-action="Edit" asp-controller ="Categories" asp-route-id="@item.CategoryID">Edit</a>
+                        <a class="btn btn-danger btn-sm" asp-action="Delete" asp-controller="Categories" asp-route-id="@item.CategoryID">Delete</a>
+                        <a class="btn btn-warning btn-sm" asp-action="Index" asp-controller="Products" asp-route-categoryId="@item.CategoryID">View</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

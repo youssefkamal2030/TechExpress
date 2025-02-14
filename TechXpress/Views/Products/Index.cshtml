@@ -1,0 +1,43 @@
+﻿@model IEnumerable<TechXpress.Models.Products>
+
+@{
+    ViewData["Title"] = "Products";
+    var categoryId = ViewData["CategoryId"];
+}
+
+<h1>Products for Category @categoryId</h1>
+
+<p>
+    <a class="btn btn-primary" asp-action="Create" asp-route-categoryId="@categoryId">Create New Product</a>
+</p>
+
+@if (Model == null || !Model.Any())
+{
+    <p class="text-danger">No products found for this category.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Product ID</th>
+                <th>Product Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in Model)
+            {
+                <tr>
+                    <td>@product.ProductID</td>
+                    <td>@product.ProductName</td>
+                    <td>
+                        <a class="btn btn-info btn-sm" asp-action="Details" asp-route-id="@product.ProductID">Details</a>
+                        <a class="btn btn-warning btn-sm" asp-action="Edit" asp-route-id="@product.ProductID">Edit</a>
+                        <a class="btn btn-danger btn-sm" asp-action="Delete" asp-route-id="@product.ProductID">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

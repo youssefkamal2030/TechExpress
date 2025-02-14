@@ -5,15 +5,14 @@ using TechXpress.Models;
 public class OrderDetails
 {
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int OrderDetailId { get; set; }
 
-    [Required]
     public int OrderId { get; set; }
 
     [ForeignKey("OrderId")]
     public Orders Order { get; set; }
 
-    [Required]
     public int ProductId { get; set; }
 
     [ForeignKey("ProductId")]

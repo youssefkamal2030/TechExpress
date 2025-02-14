@@ -11,7 +11,7 @@ namespace TechXpress.Repositories
         }
         public void Create(Users user, string password)
         {
-            _userManager.CreateAsync(user, password).Wait();
+           _userManager.CreateAsync(user, password).Wait();
         }
         public void Update(Users user)
         {
@@ -33,6 +33,10 @@ namespace TechXpress.Repositories
         {
             return _userManager.FindByIdAsync(id).Result;
 
+        }
+        public Task<Users> GetByEmailAsync(string email)
+        {
+            return _userManager.FindByEmailAsync(email);
         }
 
     }

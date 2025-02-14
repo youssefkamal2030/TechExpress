@@ -38,7 +38,7 @@ namespace TechXpress.Controllers
             {
                 _unitOfWork.Categories.Create(category);
                 _unitOfWork.Save();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index","Home");
             }
             return View(category);
         }
@@ -52,15 +52,15 @@ namespace TechXpress.Controllers
 
         [HttpPost]
        
-        public IActionResult Edit(int id, Categories category)
+        public IActionResult Edit(int id ,Categories category)
         {
-            if (id != category.CategoryID) return BadRequest();
-
+            
+            category.CategoryID = id;
             if (ModelState.IsValid)
             {
                 _unitOfWork.Categories.Update(category);
                 _unitOfWork.Save();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Index","Home");
             }
             return View(category);
         }
@@ -72,7 +72,7 @@ namespace TechXpress.Controllers
             return View(category);
         }
 
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         public IActionResult DeleteConfirmed(int id)
         {
             var category = _unitOfWork.Categories.GetByID(id);
@@ -80,7 +80,7 @@ namespace TechXpress.Controllers
 
             _unitOfWork.Categories.Delete(category);
             _unitOfWork.Save();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index","Home");
         }
     }
 }

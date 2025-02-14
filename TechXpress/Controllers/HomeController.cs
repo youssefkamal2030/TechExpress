@@ -1,21 +1,29 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using TechXpress.Models;
+using TechXpress.Repositories;
 
 namespace TechXpress.Controllers
 {
+    
+
     public class HomeController : Controller
     {
+        private readonly UnitOfWork _unitOfWork;
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
-        {
+        public HomeController(ILogger<HomeController> logger, UnitOfWork worker)
+
+        { 
             _logger = logger;
+            _unitOfWork = worker;
+
         }
 
-        public IActionResult home()
+        public IActionResult Index()
         {
-            return View();
+            var categories = _unitOfWork.Categories.GetAll() ?? new List<Categories>();
+            return View(categories);
         }
 
         public IActionResult Privacy()

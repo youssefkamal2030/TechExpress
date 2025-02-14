@@ -54,14 +54,16 @@ namespace TechXpress.Migrations
             modelBuilder.Entity("TechXpress.Models.Categories", b =>
                 {
                     b.Property<int>("CategoryID")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryID"));
 
                     b.Property<string>("CategoryName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("CategoryID");
@@ -81,9 +83,10 @@ namespace TechXpress.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("OrderStatus")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TotalAmount")
+                    b.Property<int?>("TotalAmount")
                         .HasColumnType("int");
 
                     b.Property<string>("UserID")
@@ -112,7 +115,6 @@ namespace TechXpress.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ImageURL")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Price")
@@ -126,6 +128,8 @@ namespace TechXpress.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("ProductID");
+
+                    b.HasIndex("CategoryID");
 
                     b.ToTable("Products");
                 });
@@ -206,15 +210,6 @@ namespace TechXpress.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("TechXpress.Models.Categories", b =>
-                {
-                    b.HasOne("TechXpress.Models.Products", null)
-                        .WithMany("Categories")
-                        .HasForeignKey("CategoryID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("TechXpress.Models.Orders", b =>
                 {
                     b.HasOne("TechXpress.Models.Users", "User")
@@ -226,14 +221,20 @@ namespace TechXpress.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("TechXpress.Models.Products", b =>
+                {
+                    b.HasOne("TechXpress.Models.Categories", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+                });
+
             modelBuilder.Entity("TechXpress.Models.Orders", b =>
                 {
                     b.Navigation("OrderDetails");
-                });
-
-            modelBuilder.Entity("TechXpress.Models.Products", b =>
-                {
-                    b.Navigation("Categories");
                 });
 #pragma warning restore 612, 618
         }
