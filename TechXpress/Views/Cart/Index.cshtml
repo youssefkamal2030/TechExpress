@@ -46,7 +46,6 @@
                                     </p>
                                 </div>
 
-                                <!-- Remove from cart button -->
                                 <div class="card-footer text-center">
                                     <form asp-action="RemoveFromCart" method="post">
                                         <input type="hidden" name="productId" value="@item.ProductId" />
@@ -60,7 +59,7 @@
                     }
                 </div>
 
-                <!-- Checkout Button -->
+               
                 <div class="text-center mt-4">
                     <a class="btn btn-success btn-lg" asp-action="Checkout">Checkout</a>
                 </div>
