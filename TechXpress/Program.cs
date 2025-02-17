@@ -28,7 +28,7 @@ namespace TechXpress
             })
             .AddEntityFrameworkStores<Context>()
             .AddDefaultTokenProviders();
-
+          
             //Repso Register in DI
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             builder.Services.AddScoped<UnitOfWork>();

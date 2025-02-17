@@ -39,11 +39,17 @@ namespace TechXpress.Controllers
                     var result =await _signInManager.CheckPasswordSignInAsync(ExistingUser, user.Password, false);
                     if (result.Succeeded)
                     {
+                        var cookieOptions = new CookieOptions
+                        {
+                            Secure = true,
+                            Expires = DateTime.Now.AddDays(2)
+                        };
+                        Response.Cookies.Append("username",ExistingUser.UserName, cookieOptions);
                         return RedirectToAction("Index", "Home");
                     }
                     else
                     {
-                        ModelState.AddModelError(string.Empty, "Invalid Login Attempt");
+                        ModelState.AddModelError(string.Empty, "Invalid Password");
                     }
                 }
             }
@@ -85,6 +91,14 @@ namespace TechXpress.Controllers
 
             }
             return View(user);
+        }
+
+        [HttpPost]
+        public IActionResult Logout()
+        {
+            Response.Cookies.Delete("username");
+
+            return RedirectToAction("Index", "Home");
         }
 
 

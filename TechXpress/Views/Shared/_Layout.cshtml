@@ -1,6 +1,11 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var username = Context.Request.Cookies["username"];
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
+    @RenderSection("Styles", required: false)
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - TechXpress</title>
@@ -11,37 +16,71 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">TechXpress</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
-                        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+       
+        <nav class="navbar navbar-expand-md navbar-dark bg-primary shadow-sm mb-3">
+            <div class="container">
+               
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    TechXpress
+                </a>
+
+              
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+                        aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <!-- Main nav items -->
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+               
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                
+                    <ul class="navbar-nav me-auto">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                                Home
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">
+                                Privacy
+                            </a>
                         </li>
                     </ul>
-                    <!-- Right side: Sign In / Sign Up buttons -->
-                    <div>
-                        <!-- Sign In button -->
-                        <a class="btn btn-outline-primary me-2"
-                           asp-controller="Account" asp-action="SignIn">
-                            Sign In
-                        </a>
-                        <!-- Sign Up button -->
-                        <a class="btn btn-outline-success"
-                           asp-controller="Account" asp-action="SignUp">
-                            Sign Up
-                        </a>
-                    </div>
+
+                 
+                    <ul class="navbar-nav ms-auto">
+                        @if (string.IsNullOrEmpty(username))
+                        {
+                         
+                            <li class="nav-item me-2">
+                                <a class="btn btn-outline-light"
+                                   asp-controller="Account" asp-action="SignIn">
+                                    Sign In
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="btn btn-outline-light"
+                                   asp-controller="Account" asp-action="SignUp">
+                                    Sign Up
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            
+                            <li class="nav-item d-flex align-items-center me-3">
+                                <span class="navbar-text">
+                                    Hello, @username
+                                </span>
+                            </li>
+                            <li class="nav-item">
+                                <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                    <button type="submit" class="btn btn-outline-light">
+                                        Logout
+                                    </button>
+                                </form>
+                            </li>
+                        }
+                    </ul>
                 </div>
             </div>
         </nav>
@@ -53,7 +92,7 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="border-top footer text-muted mt-4">
         <div class="container">
             &copy; 2025 - TechXpress -
             <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>

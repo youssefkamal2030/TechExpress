@@ -1,0 +1,19 @@
+﻿
+.sign-up-card {
+    margin-top: 50px;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+  
+    .sign-up-card .card-title {
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    
+    .sign-up-card .form-label {
+        font-weight: 500;
+        color: #495057;
+    }

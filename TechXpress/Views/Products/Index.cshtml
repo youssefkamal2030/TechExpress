@@ -2,42 +2,50 @@
 
 @{
     ViewData["Title"] = "Products";
-    var categoryId = ViewData["CategoryId"];
 }
 
-<h1>Products for Category @categoryId</h1>
+<h1>Products</h1>
 
-<p>
-    <a class="btn btn-primary" asp-action="Create" asp-route-categoryId="@categoryId">Create New Product</a>
-</p>
+<div class="container">
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var product in Model)
+        {
+            <div class="col">
+                <div class="card h-100">
+                   
+                    @if (!string.IsNullOrEmpty(product.ImageURL))
+                    {
+                        <img src="@Url.Content("~/Images/Laptop.jpg")"
+                             class="card-img-top"
+                             style="max-height: 200px; object-fit: cover;"
+                             alt="Product Image" />
+                    }
+                    else
+                    {
+                        <img src="@Url.Content("~/Images/no-image.png")"
+                             class="card-img-top"
+                             style="max-height: 200px; object-fit: cover;"
+                             alt="No image available" />
+                    }
 
-@if (Model == null || !Model.Any())
-{
-    <p class="text-danger">No products found for this category.</p>
-}
-else
-{
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Product ID</th>
-                <th>Product Name</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var product in Model)
-            {
-                <tr>
-                    <td>@product.ProductID</td>
-                    <td>@product.ProductName</td>
-                    <td>
-                        <a class="btn btn-info btn-sm" asp-action="Details" asp-route-id="@product.ProductID">Details</a>
-                        <a class="btn btn-warning btn-sm" asp-action="Edit" asp-route-id="@product.ProductID">Edit</a>
-                        <a class="btn btn-danger btn-sm" asp-action="Delete" asp-route-id="@product.ProductID">Delete</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+                    <div class="card-body text-center">
+                        <h5 class="card-title">@product.ProductName</h5>
+                        <p class="card-text">Price: @product.Price</p>
+                    </div>
+
+                    <div class="card-footer text-center">
+                       
+                        <form asp-action="AddToCart" asp-controller="Cart" method="post">
+                            <input type="hidden" name="NewProduct.ProductID" value="@product.ProductID" />
+
+                            <div class="input-group mb-2">
+                                <input type="number" name="quantity" value="1" min="1" class="form-control" style="max-width: 60px;" />
+                                <button type="submit" class="btn btn-success">Add to Cart</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
