@@ -8,7 +8,7 @@ namespace TechXpress.Controllers
     public class CartController : Controller
     {
         private readonly  UnitOfWork _unitOfWork;
-        private const string CartSessionKey = "Cart";
+       
 
         public CartController(UnitOfWork unitOfWork)
         {
@@ -66,17 +66,25 @@ namespace TechXpress.Controllers
             return RedirectToAction("Index");
         }
 
-        private List<CartItem> GetCart()
-        {
-            var cartJson = HttpContext.Session.GetString(CartSessionKey);
-            return cartJson == null ? new List<CartItem>() :
-                JsonSerializer.Deserialize<List<CartItem>>(cartJson);
-        }
-
         private void SaveCart(List<CartItem> cart)
         {
             var cartJson = JsonSerializer.Serialize(cart);
-            HttpContext.Session.SetString(CartSessionKey, cartJson);
+            Response.Cookies.Append("CartData", cartJson, new CookieOptions
+            {
+                Expires = DateTime.UtcNow.AddDays(7), 
+                HttpOnly = true 
+            });
+        }
+
+        private List<CartItem> GetCart()
+        {
+            if (Request.Cookies.TryGetValue("CartData", out var cartJson))
+            {
+                return string.IsNullOrEmpty(cartJson) ? new List<CartItem>() :
+                    JsonSerializer.Deserialize<List<CartItem>>(cartJson);
+            }
+
+            return new List<CartItem>();
         }
     }
 
