@@ -2,14 +2,14 @@
 using TechXpress.Models;
 using TechXpress.Repositories;
 using System.Text.Json;
-
+using TechXpress.Filters;
 namespace TechXpress.Controllers
 {
     public class CartController : Controller
     {
         private readonly  UnitOfWork _unitOfWork;
-       
 
+        [HandleError]
         public CartController(UnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
@@ -20,13 +20,13 @@ namespace TechXpress.Controllers
             var cart = GetCart();
             return View(cart);
         }
-
         [HttpPost]
         public IActionResult AddToCart(Products NewProduct, int quantity)
         {
             var product = _unitOfWork.Products.GetByID(NewProduct.ProductID);
             if (product == null)
             {
+                throw new ArgumentNullException(nameof(product));
                 return NotFound();
             }
 

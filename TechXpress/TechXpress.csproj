@@ -19,7 +19,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Filters\" />
+    <ProjectReference Include="..\TechXpress.DataAccess\TechXpress.DataAccess.csproj" />
+    <ProjectReference Include="..\TechXpress.Data\TechXpress.Models.csproj" />
   </ItemGroup>
 
 </Project>

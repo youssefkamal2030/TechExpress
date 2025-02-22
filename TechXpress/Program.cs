@@ -1,7 +1,10 @@
 using TechXpress.Models;
+using TechXpress.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using TechXpress.Repositories;
+using TechXpress.DataAccess.Dbinitializer;
+
 
 namespace TechXpress
 {
@@ -26,14 +29,20 @@ namespace TechXpress
                 options.Password.RequiredUniqueChars = 0;
                 options.User.RequireUniqueEmail = true;
             })
+            .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<Context>()
             .AddDefaultTokenProviders();
-          
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Account/SignIn";
+                options.AccessDeniedPath = "/Account/AccessDenied";
+            });
             //Repso Register in DI
             builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             builder.Services.AddScoped<UnitOfWork>();
+            builder.Services.AddScoped<IDbinitializer, Dbinitializer>();
 
-          
+
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
@@ -48,6 +57,8 @@ namespace TechXpress
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
+            
+            SeedDb();
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllerRoute(
@@ -55,6 +66,15 @@ namespace TechXpress
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
             app.Run();
+            void SeedDb()
+            {
+                using (var Scope = app.Services.CreateScope())
+                {
+                    var Dbinit = Scope.ServiceProvider.GetRequiredService<IDbinitializer>();
+                    Dbinit.Initialize();
+                }
+            }
+            
         }
     }
 }

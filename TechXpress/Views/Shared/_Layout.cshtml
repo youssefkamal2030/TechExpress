@@ -16,63 +16,50 @@
 </head>
 <body>
     <header>
-       
         <nav class="navbar navbar-expand-md navbar-dark bg-primary shadow-sm mb-3">
             <div class="container">
-               
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
                     TechXpress
                 </a>
-
-              
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
                         aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-               
-                <div class="collapse navbar-collapse" id="mainNavbar">
                 
+                <div class="collapse navbar-collapse" id="mainNavbar">
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
-                            <a class="nav-link"  asp-controller="Home" asp-action="Index">
-                                Home
-                            </a>
+                            <a class="nav-link" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link"  asp-controller="Home" asp-action="Privacy">
-                                Privacy
-                            </a>
+                            <a class="nav-link" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                        </li>
+                     
+                        <li class="nav-item">
+                            <button type="button" class="btn btn-light ms-3" onclick="toggleSidebar()">
+                                Toggle Sidebar
+                            </button>
                         </li>
                     </ul>
 
-                 
+                  
                     <ul class="navbar-nav ms-auto">
-                        <li class="nav-item me-3">
-                            <a class="btn btn-outline-light"
-                               asp-controller="Cart" asp-action="Index">
-                               Cart
-                            </a>
-                        </li>
                         @if (string.IsNullOrEmpty(username))
                         {
-                         
                             <li class="nav-item me-2">
-                                <a class="btn btn-outline-light"
-                                   asp-controller="Account" asp-action="SignIn">
+                                <a class="btn btn-outline-light" asp-controller="Account" asp-action="SignIn">
                                     Sign In
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="btn btn-outline-light"
-                                   asp-controller="Account" asp-action="SignUp">
+                                <a class="btn btn-outline-light" asp-controller="Account" asp-action="SignUp">
                                     Sign Up
                                 </a>
                             </li>
                         }
                         else
                         {
-                            
                             <li class="nav-item d-flex align-items-center me-3">
                                 <span class="navbar-text">
                                     Hello, @username
@@ -92,10 +79,35 @@
         </nav>
     </header>
 
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
+    
+    <div class="container-fluid">
+        <div class="row">
+         
+            <div class="col-md-2 bg-light" id="sidebar">
+                <div class="d-flex flex-column p-3 vh-100 sticky-top">
+                    <h5 class="mb-3">Navigation</h5>
+                    <a class="btn btn-outline-primary mb-2 w-100"
+                       asp-controller="Products" asp-action="AllProducts">
+                        All Products
+                    </a>
+                    <a class="btn btn-outline-primary mb-2 w-100"
+                       asp-controller="Home" asp-action="Index">
+                        Browse By Category
+                    </a>
+                    <a class="btn btn-outline-primary mb-2 w-100"
+                       asp-controller="Cart" asp-action="Index">
+                        Cart
+                    </a>
+                </div>
+            </div>
+
+          
+            <div class="col-md-10">
+                <main role="main" class="pb-3">
+                    @RenderBody()
+                </main>
+            </div>
+        </div>
     </div>
 
     <footer class="border-top footer text-muted mt-4">
@@ -108,6 +120,14 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById("sidebar");
+            sidebar.classList.toggle("d-none");
+        }
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

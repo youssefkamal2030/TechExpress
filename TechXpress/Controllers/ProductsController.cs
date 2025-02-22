@@ -19,6 +19,11 @@ namespace TechXpress.Controllers
             ViewData["CategoryId"] = categoryId;
             return View(products);
         }
+        public IActionResult AllProducts()
+        {
+          
+            return View("Index",_unitOfWork.Products.GetAll());
+        }
         public IActionResult Details(int id)
         {
             var product = _unitOfWork.Products.GetByID(id);
