@@ -1,0 +1,98 @@
+﻿@model IEnumerable<TechXpress.Domain.Entities.Product>    
+
+<!-- Header -->
+<header class="header">
+    <link rel="stylesheet" href="~/css/Home.css">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6">
+                <h1>TechXpress - Your One-Stop Shop for Electronics</h1>
+                <p class="p-large">Browse and buy the latest laptops, mobiles, cameras, and more with ease and confidence.</p>
+                <a class="btn-solid-lg" href="/Product/Index">Shop Now</a>
+            </div>
+            <div class="col-lg-6">
+                <div class="image-container">
+                    <img class="img-fluid" src="/images/electronics.jpg" alt="Electronics">
+                </div>
+            </div>
+        </div>
+    </div>
+
+</header>
+
+<!-- Why Choose Us -->
+@* <section class="cards-1"> *@
+@*     <div class="container"> *@
+@*         <div class="row"> *@
+@*             <div class="col-lg-12"> *@
+@*                 <h2 class="h2-heading">Why Choose TechXpress?</h2> *@
+@*             </div> *@
+@*         </div> *@
+@*         <div class="row"> *@
+@*             <div class="col-lg-12"> *@
+@*                 <div class="card"> *@
+@*                     <div class="card-body"> *@
+@*                         <h4 class="card-title">Wide Selection</h4> *@
+@*                         <p>We offer a vast range of electronics from top brands.</p> *@
+@*                     </div> *@
+@*                 </div> *@
+@*                 <div class="card"> *@
+@*                     <div class="card-body"> *@
+@*                         <h4 class="card-title">Competitive Prices</h4> *@
+@*                         <p>Get the best deals and discounts on your favorite products.</p> *@
+@*                     </div> *@
+@*                 </div> *@
+@*                 <div class="card"> *@
+@*                     <div class="card-body"> *@
+@*                         <h4 class="card-title">Fast Shipping</h4> *@
+@*                         <p>Enjoy quick and reliable delivery to your doorstep.</p> *@
+@*                     </div> *@
+@*                 </div> *@
+@*             </div> *@
+@*         </div> *@
+@*     </div> *@
+@* </section> *@
+
+<!-- Featured Products -->
+<section class="cards-2">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <h2 class="h2-heading">Featured Products</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <!-- Example Product -->
+                <div class="card">
+                    <div class="card-body">
+                        @{
+                            if (Model != null)
+                            {
+                                foreach (var product in Model) ;
+                            }
+                            else
+                            {
+								<p>No products found.</p>
+                            }
+                            
+                        }
+                        <a class="btn-solid-reg" href="/Product/Details/1">View Details</a>
+                    </div>
+                </div>
+                <!-- Add more products dynamically via Razor or JavaScript -->
+                <div class="card">
+                    <div class="card-body">
+                        <img class="img-fluid" src="/images/product2.jpg" alt="Product 2">
+                        <h5 class="card-title">Smartphone ABC</h5>
+                        <p>$599.99</p>
+                        <a class="btn-solid-reg" href="/Product/Details/2">View Details</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<script src="~/js/JavaScript.js"></script>
