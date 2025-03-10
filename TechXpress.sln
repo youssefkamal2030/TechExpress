@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechXpress.Domain", "TechXpress.Domain\TechXpress.Domain.csproj", "{451B211A-9F19-4892-99F3-B413709C4599}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechXpress.Application", "TechXpress.Application\TechXpress.Application.csproj", "{76AF17DB-231C-42FA-BC1E-C1BF4A4E9A9B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechXpress.Infrastructure", "TechXpress.Infrastructure\TechXpress.Infrastructure.csproj", "{9BC59626-0132-470E-B27B-73B0E91337CE}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechXpress.Web", "TechXpress.Web\TechXpress.Web.csproj", "{DBCBAA6B-22C6-4FBF-BCCA-1E41516F66E5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechXpress.Models", "TechXpress.Models\TechXpress.Models.csproj", "{13926222-4DCD-4891-9693-87C8CFBA235F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechXpress.DataAccess", "TechXpress.DataAccess\TechXpress.DataAccess.csproj", "{DF4AE39A-3EB6-44CD-B277-868A45977E10}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TechXpress.Services", "TechXpress.Services\TechXpress.Services.csproj", "{D49A31EF-8612-4E1D-B41F-6C5192F4FAE7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,22 +17,22 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{451B211A-9F19-4892-99F3-B413709C4599}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{451B211A-9F19-4892-99F3-B413709C4599}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{451B211A-9F19-4892-99F3-B413709C4599}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{451B211A-9F19-4892-99F3-B413709C4599}.Release|Any CPU.Build.0 = Release|Any CPU
-		{76AF17DB-231C-42FA-BC1E-C1BF4A4E9A9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{76AF17DB-231C-42FA-BC1E-C1BF4A4E9A9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{76AF17DB-231C-42FA-BC1E-C1BF4A4E9A9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{76AF17DB-231C-42FA-BC1E-C1BF4A4E9A9B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9BC59626-0132-470E-B27B-73B0E91337CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9BC59626-0132-470E-B27B-73B0E91337CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9BC59626-0132-470E-B27B-73B0E91337CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9BC59626-0132-470E-B27B-73B0E91337CE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DBCBAA6B-22C6-4FBF-BCCA-1E41516F66E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DBCBAA6B-22C6-4FBF-BCCA-1E41516F66E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DBCBAA6B-22C6-4FBF-BCCA-1E41516F66E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DBCBAA6B-22C6-4FBF-BCCA-1E41516F66E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13926222-4DCD-4891-9693-87C8CFBA235F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13926222-4DCD-4891-9693-87C8CFBA235F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13926222-4DCD-4891-9693-87C8CFBA235F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13926222-4DCD-4891-9693-87C8CFBA235F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF4AE39A-3EB6-44CD-B277-868A45977E10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF4AE39A-3EB6-44CD-B277-868A45977E10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF4AE39A-3EB6-44CD-B277-868A45977E10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF4AE39A-3EB6-44CD-B277-868A45977E10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D49A31EF-8612-4E1D-B41F-6C5192F4FAE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D49A31EF-8612-4E1D-B41F-6C5192F4FAE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D49A31EF-8612-4E1D-B41F-6C5192F4FAE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D49A31EF-8612-4E1D-B41F-6C5192F4FAE7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -24,9 +24,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TechXpress.Application\TechXpress.Application.csproj" />
-    <ProjectReference Include="..\TechXpress.Domain\TechXpress.Domain.csproj" />
-    <ProjectReference Include="..\TechXpress.Infrastructure\TechXpress.Infrastructure.csproj" />
+    <ProjectReference Include="..\TechXpress.DataAccess\TechXpress.DataAccess.csproj" />
+    <ProjectReference Include="..\TechXpress.Domain\TechXpress.Models.csproj" />
+    <ProjectReference Include="..\TechXpress.Infrastructure\TechXpress.DataAccess.csproj" />
+    <ProjectReference Include="..\TechXpress.Models\TechXpress.Models.csproj" />
+    <ProjectReference Include="..\TechXpress.Services\TechXpress.Services.csproj" />
   </ItemGroup>
 
 </Project>

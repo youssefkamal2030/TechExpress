@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using TechXpress.Application.Interfaces;
+using TechXpress.DataAccess.Interfaces;
 using TechXpress.Application.Services;
 using TechXpress.DataAccess.Dbinitializer;
-using TechXpress.Domain.Entities;
-using TechXpress.Infrastructure.Data;
-using TechXpress.Infrastructure.Services;
-
+using TechXpress.DataAccess.Data;
+using TechXpress.Models.entitis;
+using TechXpress.Services;
+using TechXpress.DataAccess.Repositories;
 
 namespace TechXpress
 {
@@ -43,8 +43,9 @@ namespace TechXpress
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<ProductService>();
             builder.Services.AddScoped<OrderService>();
-            builder.Services.AddScoped<ICartService, CartService>();
-            builder.Services.AddScoped<ICartStorage, SessionCartStorage>();
+            builder.Services.AddScoped<IShoppingCartRepository, ShoppingCartRepository>();
+            builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+
             builder.Services.AddScoped<IPaymentGateway>(sp => new StripePaymentGateway(builder.Configuration["Stripe:ApiKey"]));
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddSession();
