@@ -1,98 +1,68 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <!-- SEO Meta Tags -->
-    <meta name="description" content="TechXpress is your one-stop shop for the latest electronics.">
-    <meta name="author" content="YourName">
-    <!-- Website Title -->
-    <title>TechXpress - Electronics Store</title>
-    <!-- Styles -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/6.8.4/swiper-bundle.min.css">
-    <link rel="stylesheet" href="~/css/Layout.css">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>TechXpress Homepage </title>
+    <!-- Favicon-->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico" />
+    <!-- Bootstrap icons-->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
+    <!-- Core theme CSS (includes Bootstrap)-->
+    <link href="css/styles.css" rel="stylesheet" />
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
-        <div class="container">
-            <a class="navbar-brand logo-text" href="/">TechXpress</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/Product/Index">Products</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/About/Index">About Us</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/Contact/Index">Contact</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/Cart/Index">Cart</a>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container px-4 px-lg-5">
+            <a class="navbar-brand" href="/Home/Index">TechXpress</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
+                    <li class="nav-item"><a class="nav-link active" aria-current="page" href="#!">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#!">About</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Shop</a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="#!">All Products</a></li>
+                            <li><hr class="dropdown-divider" /></li>
+                            <li><a class="dropdown-item" href="#!">Popular Items</a></li>
+                            <li><a class="dropdown-item" href="#!">New Arrivals</a></li>
+                        </ul>
                     </li>
                 </ul>
-                @if (User.Identity.IsAuthenticated)
-                {
-                    <span class="nav-item">
-                        <a class="btn-outline-sm" href="/Account/Logout">Log Out</a>
-                    </span>
-                }
-                else
-                {
-                    <span class="nav-item">
-                        <a class="btn-outline-sm" href="/Account/Login">Log In</a>
-                    </span>
-                    <span class="nav-item">
-                        <a class="btn-outline-sm" href="/Account/Register">Sign Up</a>
-                    </span>
-                }
+                <div class="d-flex align-items-center">
+                    <a class="btn btn-outline-dark me-2" href="/Cart">
+                        <i class="bi-cart-fill me-1"></i>
+                        Cart
+                        <span class="badge bg-dark text-white ms-1 rounded-pill">0</span>
+                    </a>
+                    <a class="btn btn-outline-primary me-2" href="/Account/Login">Login</a>
+                    <a class="btn btn-outline-success" href="/Account/Signup">Signup</a>
+                </div>
             </div>
         </div>
     </nav>
-    <!-- End of Navigation -->
-    <!-- Page Content -->
-    <div class="container mt-5 pt-5">
-        @RenderBody()
-    </div>
-
-    <!-- Footer -->
-    <footer class="footer mt-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <h4>About TechXpress</h4>
-                    <p>TechXpress is dedicated to providing the latest electronics at competitive prices.</p>
-                </div>
-                <div class="col-md-4">
-                    <h4>Important Links</h4>
-                    <ul class="list-unstyled">
-                        <li><a href="/Terms">Terms & Conditions</a></li>
-                        <li><a href="/Privacy">Privacy Policy</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-4">
-                    <h4>Contact</h4>
-                    <p><i class="fas fa-map-marker-alt"></i> 123 Tech Street, City, Country</p>
-                    <p><i class="fas fa-envelope"></i> <a href="mailto:contact@techxpress.com">contact@techxpress.com</a></p>
-                </div>
+    <header class="bg-dark py-5">
+        <div class="container px-4 px-lg-5 my-5">
+            <div class="text-center text-white">
+                <h1 class="display-4 fw-bolder">Shop in style</h1>
+                <p class="lead fw-normal text-white-50 mb-0">Shope now</p>
             </div>
         </div>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+    <footer class="py-5 bg-dark">
+        <div class="container"><p class="m-0 text-center text-white">Copyright &copy; Your Website 2023</p></div>
     </footer>
-
-    <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/6.8.4/swiper-bundle.min.js"></script>
-    <script src="~/js/Layout.js"></script>
-  
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script src="js/scripts.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

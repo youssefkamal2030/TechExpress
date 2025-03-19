@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using TechXpress.DataAccess.Data;
-using TechXpress.Models.entitis; 
 using TechXpress.DataAccess.Interfaces;
+using TechXpress.Models.entitis;
 
 namespace TechXpress.DataAccess.Repositories
 {
@@ -17,38 +18,93 @@ namespace TechXpress.DataAccess.Repositories
             _context = context;
         }
 
-        public async Task AddAsync(ShoppingCart entity)
+        // IRepository<ShoppingCart> Methods
+        public async Task<ShoppingCart> GetByIdAsync(int id)
         {
-            if (entity != null)
-            {
-                await _context.shoppingCarts.AddAsync(entity);
-            }
-        }
-
-        public async Task DeleteAsync(int id)
-        {
-            var cartItem = await _context.shoppingCarts.FindAsync(id);
-            if (cartItem != null)
-            {
-                _context.shoppingCarts.Remove(cartItem);
-            }
+            return await _context.ShoppingCarts
+                .Include(c => c.Items)
+                .FirstOrDefaultAsync(c => c.Id == id);
         }
 
         public async Task<IEnumerable<ShoppingCart>> GetAllAsync()
         {
-            return await _context.shoppingCarts.ToListAsync();
+            return await _context.ShoppingCarts
+                .Include(c => c.Items)
+                .ToListAsync();
         }
 
-        public async Task<ShoppingCart> GetByIdAsync(int id)
+        public async Task AddAsync(ShoppingCart entity)
         {
-            return await _context.shoppingCarts.FindAsync(id);
+            await _context.ShoppingCarts.AddAsync(entity);
+            await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(ShoppingCart entity)
         {
-            if (entity != null)
+            _context.ShoppingCarts.Update(entity);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteAsync(int id)
+        {
+            var cart = await _context.ShoppingCarts.FindAsync(id);
+            if (cart != null)
             {
-                _context.shoppingCarts.Update(entity);
+                _context.ShoppingCarts.Remove(cart);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        // IShoppingCartRepository Methods
+        public async Task<ShoppingCart> GetCartByUserIdAsync(string userId)
+        {
+            return await _context.ShoppingCarts
+                .Include(c => c.Items)
+                .FirstOrDefaultAsync(c => c.ApplicationUserId == userId);
+        }
+
+        public async Task AddItemToCartAsync(string userId, int productId, int quantity)
+        {
+            var cart = await GetCartByUserIdAsync(userId) ?? new ShoppingCart { ApplicationUserId = userId };
+            var item = cart.Items.FirstOrDefault(i => i.ProductId == productId);
+
+            if (item != null)
+            {
+                item.Quantity += quantity;
+            }
+            else
+            {
+                cart.Items.Add(new CartItem { ProductId = productId, Quantity = quantity });
+            }
+
+            _context.Update(cart); // Update if existing, or add if new
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task RemoveItemFromCartAsync(string userId, int productId)
+        {
+            var cart = await GetCartByUserIdAsync(userId);
+            if (cart == null) return;
+
+            var item = cart.Items.FirstOrDefault(i => i.ProductId == productId);
+            if (item != null)
+            {
+                cart.Items.Remove(item);
+                if (!cart.Items.Any())
+                {
+                    _context.ShoppingCarts.Remove(cart); // Remove cart if empty
+                }
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task ClearCartAsync(string userId)
+        {
+            var cart = await GetCartByUserIdAsync(userId);
+            if (cart != null)
+            {
+                _context.ShoppingCarts.Remove(cart);
+                await _context.SaveChangesAsync();
             }
         }
     }

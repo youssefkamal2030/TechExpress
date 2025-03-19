@@ -1,5 +1,5 @@
 ﻿using Stripe;
-using TechXpress.DataAccess.Interfaces;
+using TechXpress.Services.Interfaces;
 
 namespace TechXpress.Services
 {
@@ -27,6 +27,25 @@ namespace TechXpress.Services
             {
                 var charge = await service.CreateAsync(options);
                 return charge.Status == "succeeded";
+            }
+            catch (StripeException)
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> RefundAsync(string transactionId, decimal amount)
+        {
+            var options = new RefundCreateOptions
+            {
+                Charge = transactionId,
+                Amount = (long)(amount * 100) // Convert to cents
+            };
+            var service = new RefundService();
+            try
+            {
+                var refund = await service.CreateAsync(options);
+                return refund.Status == "succeeded";
             }
             catch (StripeException)
             {

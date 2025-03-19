@@ -4,17 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TechXpress.Application.Dto_s
+namespace TechXpress.Models.Dto_s
 {
-    public class ProductDto
+    public class ProductDTO
     {
         public int Id { get; set; }
+        public int CategoryId { get; set; }
+        public string CategoryName { get; set; } // Flattened from Category
         public string Name { get; set; }
         public decimal Price { get; set; }
         public int Stock { get; set; }
         public string ImageUrl { get; set; }
         public DateTime CreatedAt { get; set; }
-        public int CategoryId { get; set; }
-        public string CategoryName { get; set; }
     }
 }

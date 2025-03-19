@@ -1,96 +1,32 @@
-﻿@model List<TechXpress.Application.Dto_s.ProductDto>
-
-<!-- Header -->
-<header class="header">
-    <link rel="stylesheet" href="~/css/Home.css">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-6">
-                <h1>TechXpress - Your One-Stop Shop for Electronics</h1>
-                <p class="p-large">Browse and buy the latest laptops, mobiles, cameras, and more with ease and confidence.</p>
-                <a class="btn-solid-lg" href="/Product/Index">Shop Now</a>
-            </div>
-            <div class="col-lg-6">
-                <div class="image-container">
-                    <img class="img-fluid" src="/images/electronics.jpg" alt="Electronics">
-                </div>
-            </div>
-        </div>
-    </div>
-</header>
-
-<!-- Why Choose Us -->
-@* <section class="cards-1"> *@
-@*     <div class="container"> *@
-@*         <div class="row"> *@
-@*             <div class="col-lg-12"> *@
-@*                 <h2 class="h2-heading">Why Choose TechXpress?</h2> *@
-@*             </div> *@
-@*         </div> *@
-@*         <div class="row"> *@
-@*             <div class="col-lg-12"> *@
-@*                 <div class="card"> *@
-@*                     <div class="card-body"> *@
-@*                         <h4 class="card-title">Wide Selection</h4> *@
-@*                         <p>We offer a vast range of electronics from top brands.</p> *@
-@*                     </div> *@
-@*                 </div> *@
-@*                 <div class="card"> *@
-@*                     <div class="card-body"> *@
-@*                         <h4 class="card-title">Competitive Prices</h4> *@
-@*                         <p>Get the best deals and discounts on your favorite products.</p> *@
-@*                     </div> *@
-@*                 </div> *@
-@*                 <div class="card"> *@
-@*                     <div class="card-body"> *@
-@*                         <h4 class="card-title">Fast Shipping</h4> *@
-@*                         <p>Enjoy quick and reliable delivery to your doorstep.</p> *@
-@*                     </div> *@
-@*                 </div> *@
-@*             </div> *@
-@*         </div> *@
-@*     </div> *@
-@* </section> *@
-
-<!-- Featured Products -->
-<section class="cards-2">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <h2 class="h2-heading">Featured Products</h2>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-lg-12">
-                @if (Model == null || !Model.Any())
-                {
-                    <p>No featured products available at the moment.</p>
-                }
-                else
-                {
-                    @foreach (var product in Model)
-                    {
-                        <div class="card">
-                            <div class="card-body">
-                                @if (!string.IsNullOrEmpty(product.ImageUrl))
-                                {
-                                    <img class="img-fluid" src="@product.ImageUrl" alt="@product.Name">
-                                }
-                                else
-                                {
-                                    <img class="img-fluid" src="/images/placeholder.jpg" alt="No image available">
-                                }
-                                <h5 class="card-title">@product.Name</h5>
-                                <p>@product.Price.ToString("C")</p>
-                                <p>Category: @product.CategoryName</p>
-                                <a class="btn-solid-reg" href="/Product/Details/@product.Id">View Details</a>
+﻿@model IEnumerable<TechXpress.Models.Dto_s.ProductDTO>
+<section class="py-5">
+    <div class="container px-4 px-lg-5 mt-5">
+        <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
+            @foreach (var product in Model)
+            {
+                <div class="col mb-5">
+                    <div class="card h-100">
+                        <!-- Product image -->
+                        <img class="card-img-top" src="@product.ImageUrl" alt="@product.Name" />
+                        <!-- Product details -->
+                        <div class="card-body p-4">
+                            <div class="text-center">
+                                <!-- Product name -->
+                                <h5 class="fw-bolder">@product.Name</h5>
+                                <!-- Product price -->
+                                $@product.Price
                             </div>
                         </div>
-                    }
-                }
-            </div>
+                        <!-- Product actions -->
+                        <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
+                            <div class="text-center">
+                                <a class="btn btn-outline-dark mt-auto" href="@Url.Action("Details", "Products", new { id = product.Id })">View options</a>
+                                <a class="btn btn-outline-dark mt-auto" href="@Url.Action("AddToCart", "Cart", new { id = product.Id })">Add to cart</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     </div>
 </section>
-
-<script src="~/js/JavaScript.js"></script>

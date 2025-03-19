@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TechXpress.Models.entitis;
 
-namespace TechXpress.DataAccess.Interfaces
+namespace TechXpress.Services.Interfaces
 {
     public interface IAuthService
     {

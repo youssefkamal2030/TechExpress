@@ -1,4 +1,4 @@
-﻿namespace TechXpress.DataAccess.Interfaces
+﻿namespace TechXpress.Services.Interfaces
 { 
     public interface IPaymentGateway
     {

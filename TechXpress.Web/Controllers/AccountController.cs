@@ -1,39 +1,45 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using TechXpress.Domain.Entities;
-using TechXpress.Infrastructure.Data;
+using TechXpress.Models.entitis;
+using TechXpress.Services.Interfaces;
+
 namespace TechXpress.Web.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly UnitOfWork _Worker;
-        private readonly UserManager<User> _UserManager;
-        public AccountController(UnitOfWork worker, UserManager<User> userManager) {
-            _Worker = worker;
-            _UserManager = userManager;
+        private readonly IAuthService _authService;
+
+        public AccountController(IAuthService authService)
+        {
+            _authService = authService;
         }
+
         public IActionResult Login()
         {
             return View();
         }
+
         [HttpPost]
-        public IActionResult Login(string username, string password)
+        public async Task<IActionResult> Login(string email, string password)
         {
-            if (username == "admin" && password == "admin")
+            try
             {
-                HttpContext.Session.SetString("username", username);
+                var user = new User { Email = email, password = password };
+                var token = await _authService.LoginUserAsync(user);
+                HttpContext.Session.SetString("token", token);
                 return RedirectToAction("Index", "Home");
             }
-            else
+            catch (Exception ex)
             {
-                ViewBag.Error = "Invalid username or password";
+                ViewBag.Error = ex.Message;
                 return View();
             }
         }
+
         public IActionResult Logout()
         {
-            HttpContext.Session.Remove("username");
+            HttpContext.Session.Remove("token");
             return RedirectToAction("Index", "Home");
         }
 
@@ -41,17 +47,25 @@ namespace TechXpress.Web.Controllers
         {
             return View();
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult SignUp(User user)
+        public async Task<IActionResult> SignUp(User user)
         {
             if (ModelState.IsValid)
             {
-                _UserManager.CreateAsync(user, user.password);
-
-                return RedirectToAction("Login");
+                try
+                {
+                    await _authService.RegisterUserAsync(user);
+                    return RedirectToAction("Login");
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError(string.Empty, ex.Message);
+                    return View(user);
+                }
             }
-            return View();
+            return View(user);
         }
     }
 }

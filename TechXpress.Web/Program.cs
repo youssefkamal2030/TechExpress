@@ -7,6 +7,9 @@ using TechXpress.DataAccess.Data;
 using TechXpress.Models.entitis;
 using TechXpress.Services;
 using TechXpress.DataAccess.Repositories;
+using TechXpress.Services.Services;
+using TechXpress.Services.Interfaces;
+using TechXpress.Models.Mappings;
 
 namespace TechXpress
 {
@@ -38,15 +41,16 @@ namespace TechXpress
                 options.LoginPath = "/Account/SignIn";
                 options.AccessDeniedPath = "/Account/AccessDenied";
             });
+            builder.Services.AddAutoMapper(typeof(MappingProfile));
             //Repso Register in DI
             builder.Services.AddScoped<IDbinitializer, Dbinitializer>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<ProductService>();
-            builder.Services.AddScoped<OrderService>();
             builder.Services.AddScoped<IShoppingCartRepository, ShoppingCartRepository>();
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-
-            builder.Services.AddScoped<IPaymentGateway>(sp => new StripePaymentGateway(builder.Configuration["Stripe:ApiKey"]));
+            builder.Services.AddScoped<ITokenService, TokenService>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IProductService, ProductService>();
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddSession();
             builder.Services.AddControllersWithViews();
@@ -63,7 +67,7 @@ namespace TechXpress
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
-            
+            app.UseSession();
             SeedDb();
             app.UseAuthentication();
             app.UseAuthorization();
@@ -81,6 +85,6 @@ namespace TechXpress
                 }
             }
 
-        }
+        }   
     }
 }

@@ -5,11 +5,11 @@ using TechXpress.DataAccess.Data;
 
 namespace TechXpress.DataAccess.Repositories
 {
-    public class ProductRepository : Repository<Product>
+    public class ProductRepository : IProductRepository
     {
         private readonly TechXpressDbContext _context;
 
-        public ProductRepository(TechXpressDbContext context) : base(context)
+        public ProductRepository(TechXpressDbContext context) 
         {
             _context = context;
         }
