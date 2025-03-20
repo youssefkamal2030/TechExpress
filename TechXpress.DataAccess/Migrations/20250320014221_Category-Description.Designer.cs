@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TechXpress.DataAccess.Data;
 
@@ -11,9 +12,11 @@ using TechXpress.DataAccess.Data;
 namespace TechXpress.DataAccess.Migrations
 {
     [DbContext(typeof(TechXpressDbContext))]
-    partial class TechXpressDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250320014221_Category-Description")]
+    partial class CategoryDescription
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -286,6 +289,7 @@ namespace TechXpress.DataAccess.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImageUrl")

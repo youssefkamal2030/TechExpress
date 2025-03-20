@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using TechXpress.Models.Dto_s;
 using TechXpress.Services.Interfaces;
 
 namespace TechXpress.Web.Controllers
@@ -14,8 +15,18 @@ namespace TechXpress.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var products = await _productService.GetAllProductsAsync();
+            var products = new List<ProductDTO>();
+            try
+            {
+                products = (await _productService.GetAllProductsAsync()).ToList();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                ViewBag.Error = ex.Message;
+
+            }
             return View(products);
+
         }
     }
 }

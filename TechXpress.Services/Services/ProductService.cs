@@ -24,12 +24,20 @@ namespace TechXpress.Application.Services
         public async Task<IEnumerable<ProductDTO>> GetAllProductsAsync()
         {
             var products = await _unitOfWork.Products.GetAllAsync();
+            if(products == null)
+            {
+                throw new KeyNotFoundException("No products found.");
+            }
             return _mapper.Map<IEnumerable<ProductDTO>>(products);
         }
 
         public async Task<ProductDTO> GetProductByIdAsync(int id)
         {
             var product = await _unitOfWork.Products.GetByIdAsync(id);
+            if(product == null)
+            {
+                throw new KeyNotFoundException($"Product with ID {id} not found.");
+            }
             return _mapper.Map<ProductDTO>(product);
         }
 
