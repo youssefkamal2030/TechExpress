@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TechXpress.Models.entitis;
@@ -27,7 +29,14 @@ namespace TechXpress.Web.Controllers
             {
                 var user = new User { Email = email, password = password };
                 var token = await _authService.LoginUserAsync(user);
-                HttpContext.Session.SetString("token", token);
+                var claims = new List<Claim>
+              {
+                  new Claim (ClaimTypes.Name , email),
+                  new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                  new Claim("Token", token)
+              };
+                var identity = new ClaimsIdentity(claims, "CookieAuth");
+                await HttpContext.SignInAsync("CookieAuth", new ClaimsPrincipal(identity));
                 return RedirectToAction("Index", "Home");
             }
             catch (Exception ex)
@@ -39,7 +48,7 @@ namespace TechXpress.Web.Controllers
 
         public IActionResult Logout()
         {
-            HttpContext.Session.Remove("token");
+            HttpContext.SignOutAsync("CookieAuth");
             return RedirectToAction("Index", "Home");
         }
 

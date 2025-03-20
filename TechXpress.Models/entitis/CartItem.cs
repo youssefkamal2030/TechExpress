@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using static TechXpress.Models.Dto_s.ShoppingCartDTO;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TechXpress.Models.entitis
@@ -17,10 +16,10 @@ namespace TechXpress.Models.entitis
         public int ProductId { get; set; }
         [ForeignKey(nameof(ProductId))]
         public Product Product { get; set; }
-
+        public string? ImageUrl { get; set; }
         public int Quantity { get; set; }
 
        
-        public decimal PriceAtAdd { get; set; }
+        public decimal? PriceAtAdd { get; set; }
     }
 }

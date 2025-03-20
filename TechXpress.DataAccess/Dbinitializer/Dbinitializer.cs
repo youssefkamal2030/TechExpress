@@ -48,6 +48,7 @@ namespace TechXpress.DataAccess.Dbinitializer
                 {
                     UserName = "YoussefKamal",
                     Email = "Youssefkamal@gmail.com",
+                    password = "123456789k",
                     PhoneNumber = "1234567890",
                 };
                 _userManager.CreateAsync(adminUser, "123456789k").GetAwaiter().GetResult();

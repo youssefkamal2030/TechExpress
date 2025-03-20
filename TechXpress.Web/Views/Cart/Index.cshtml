@@ -1,0 +1,122 @@
+﻿@model TechXpress.Models.Dto_s.ShoppingCartDTO
+
+@{
+    ViewData["Title"] = "Cart";
+}
+
+<section class="h-100 gradient-custom">
+    <div class="container py-5">
+        <div class="row d-flex justify-content-center my-4">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header py-3">
+                        <h5 class="mb-0">Cart - @(Model?.Items?.Count ?? 0) items</h5>
+                    </div>
+                    <div class="card-body">
+                        @if (Model != null && Model.Items != null && Model.Items.Any())
+                        {
+                            foreach (var item in Model.Items)
+                            {
+                                <div class="row">
+                                    <div class="col-lg-3 col-md-12 mb-4 mb-lg-0">
+                                        <img src="@item." class="w-100" alt="@item.ProductName" />
+                                    </div>
+                                    <div class="col-lg-5 col-md-6 mb-4 mb-lg-0">
+                                        <p><strong>@item.ProductName</strong></p>
+      
+                                        <form asp-action="RemoveFromCart" asp-controller="Cart" method="post">
+                                            <input type="hidden" name="productId" value="@item.ProductId" />
+                                            <button type="submit" class="btn btn-primary btn-sm me-1 mb-2">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div class="col-lg-4 col-md-6 mb-4 mb-lg-0">
+                                        <div class="d-flex mb-4" style="max-width: 300px">
+                                            <button class="btn btn-primary px-3 me-2" onclick="decrementQuantity(@item.ProductId)">
+                                                <i class="fas fa-minus"></i>
+                                            </button>
+                                            <input id="quantity-@item.ProductId" min="0" value="@item.Quantity" type="number" class="form-control" onchange="updateQuantity(@item.ProductId, this.value)" />
+                                            <button class="btn btn-primary px-3 ms-2" onclick="incrementQuantity(@item.ProductId)">
+                                                <i class="fas fa-plus"></i>
+                                            </button>
+                                        </div>
+                                        <p class="text-start text-md-center">
+                                            <strong>@(item.PriceAtAdd * item.Quantity)$</strong>
+                                        </p>
+                                    </div>
+                                </div>
+                                <hr class="my-4" />
+                            }
+                        }
+                        else
+                        {
+                            <p>Your cart is empty.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header py-3">
+                        <h5 class="mb-0">Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 pb-0">
+                                Products
+                                <span>@(Model?.TotalPrice ?? 0)$</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                Shipping
+                                <span>Gratis</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 mb-3">
+                                <div>
+                                    <strong>Total amount</strong>
+                                    <strong><p class="mb-0">(including VAT)</p></strong>
+                                </div>
+                                <span><strong>@(Model?.TotalPrice ?? 0)$</strong></span>
+                            </li>
+                        </ul>
+                        <button type="button" class="btn btn-primary btn-lg btn-block">
+                            Go to checkout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        function incrementQuantity(productId) {
+            var quantityInput = document.getElementById('quantity-' + productId);
+            quantityInput.stepUp();
+            updateQuantity(productId, quantityInput.value);
+        }
+
+        function decrementQuantity(productId) {
+            var quantityInput = document.getElementById('quantity-' + productId);
+            if (quantityInput.value > 0) {
+                quantityInput.stepDown();
+                updateQuantity(productId, quantityInput.value);
+            }
+        }
+
+        function updateQuantity(productId, quantity) {
+            $.ajax({
+                url: '@Url.Action("UpdateQuantity", "Cart")',
+                type: 'POST',
+                data: { productId: productId, quantity: quantity },
+                success: function () {
+                    location.reload(); // Refresh page to reflect updated cart
+                },
+                error: function () {
+                    alert('Error updating quantity');
+                }
+            });
+        }
+    </script>
+}

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TechXpress.Models.Dto_s;
+using TechXpress.Models.entitis;
 
 namespace TechXpress.Services.Interfaces
 {
@@ -13,5 +15,6 @@ namespace TechXpress.Services.Interfaces
         Task ClearCartAsync(string userId);
         Task<int> GetCartCountAsync(string userId);
         Task<decimal> GetCartTotalAsync(string userId);
+        Task<ShoppingCartDTO> GetCartByUserIdAsync(string userId);
     }
 }

@@ -42,7 +42,19 @@ namespace TechXpress
                 options.AccessDeniedPath = "/Account/AccessDenied";
             });
             builder.Services.AddAutoMapper(typeof(MappingProfile));
-            //Repso Register in DI
+            builder.Services.AddAuthentication("CookieAuth")
+            .AddCookie("CookieAuth", options =>
+            {
+        options.LoginPath = "/Account/Login";
+            });
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = System.TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+            //Repso and Services Register 
             builder.Services.AddScoped<IDbinitializer, Dbinitializer>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<ProductService>();
@@ -51,6 +63,7 @@ namespace TechXpress
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
             builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped<IShoppingCartService, CartService>();
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddSession();
             builder.Services.AddControllersWithViews();

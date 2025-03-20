@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
-using TechXpress.Models.entitis;
+using TechXpress.Models.entitis; // Assuming this is the namespace for entities
 using TechXpress.Models.Dto_s;
+
+
 
 namespace TechXpress.Models.Mappings
 {
@@ -16,30 +18,29 @@ namespace TechXpress.Models.Mappings
 
             // CartItem <-> CartItemDTO
             CreateMap<CartItem, CartItemDTO>()
-                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name));
-            CreateMap<CartItemDTO, CartItem>();
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name))
+                .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.Product.ImageUrl))
+                
+                .ForMember(dest => dest.PriceAtAdd, opt => opt.MapFrom(src => src.PriceAtAdd));
+            CreateMap<CartItemDTO, CartItem>()
+                .ForMember(dest => dest.Product, opt => opt.Ignore()); 
 
-            // Order <-> OrderDTO
+            
             CreateMap<Order, OrderDTO>()
                 .ForMember(dest => dest.OrderItems, opt => opt.MapFrom(src => src.OrderItems));
             CreateMap<OrderDTO, Order>()
                 .ForMember(dest => dest.OrderItems, opt => opt.MapFrom(src => src.OrderItems));
 
-            // OrderItem <-> OrderItemDTO
             CreateMap<OrderItem, OrderItemDTO>()
                 .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name));
             CreateMap<OrderItemDTO, OrderItem>();
 
-            // Product <-> ProductDTO
             CreateMap<Product, ProductDTO>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
             CreateMap<ProductDTO, Product>();
 
-            // Category <-> CategoryDTO
             CreateMap<Category, CategoryDTO>();
             CreateMap<CategoryDTO, Category>();
-
-          
         }
     }
 }

@@ -18,11 +18,11 @@ namespace TechXpress.DataAccess.Repositories
             _context = context;
         }
 
-        // IRepository<ShoppingCart> Methods
         public async Task<ShoppingCart> GetByIdAsync(int id)
         {
             return await _context.ShoppingCarts
                 .Include(c => c.Items)
+                .ThenInclude(i => i.Product) 
                 .FirstOrDefaultAsync(c => c.Id == id);
         }
 
@@ -30,6 +30,7 @@ namespace TechXpress.DataAccess.Repositories
         {
             return await _context.ShoppingCarts
                 .Include(c => c.Items)
+                .ThenInclude(i => i.Product) 
                 .ToListAsync();
         }
 
@@ -65,19 +66,42 @@ namespace TechXpress.DataAccess.Repositories
 
         public async Task AddItemToCartAsync(string userId, int productId, int quantity)
         {
-            var cart = await GetCartByUserIdAsync(userId) ?? new ShoppingCart { ApplicationUserId = userId };
-            var item = cart.Items.FirstOrDefault(i => i.ProductId == productId);
+            if (quantity <= 0)
+            {
+                throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
+            }
 
+            var cart = await GetCartByUserIdAsync(userId);
+            if (cart == null)
+            {
+                cart = new ShoppingCart
+                {
+                    ApplicationUserId = userId,
+                    Items = new List<CartItem>()
+                };
+                await _context.ShoppingCarts.AddAsync(cart);
+            }
+
+            var item = cart.Items.FirstOrDefault(i => i.ProductId == productId);
             if (item != null)
             {
                 item.Quantity += quantity;
             }
             else
             {
-                cart.Items.Add(new CartItem { ProductId = productId, Quantity = quantity });
+                var product = await _context.Products.FindAsync(productId);
+                if (product == null)
+                {
+                    throw new ArgumentException("Product not found.", nameof(productId));
+                }
+                cart.Items.Add(new CartItem
+                {
+                    ProductId = productId,
+                    Quantity = quantity,
+                    PriceAtAdd = product.Price // Capture price at the time of addition
+                });
             }
 
-            _context.Update(cart); // Update if existing, or add if new
             await _context.SaveChangesAsync();
         }
 
