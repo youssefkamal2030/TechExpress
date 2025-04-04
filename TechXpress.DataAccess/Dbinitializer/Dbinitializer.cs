@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TechXpress.DataAccess.Data;
@@ -23,26 +24,24 @@ namespace TechXpress.DataAccess.Dbinitializer
             _db = db;
         }
 
-        public void Initialize()
+        public async Task InitializeAsync()
         {
-            
             try
             {
                 if (_db.Database.GetPendingMigrations().Count() > 0)
                 {
-                    _db.Database.Migrate();
+                    await _db.Database.MigrateAsync();
                 }
             }
             catch (Exception ex)
             {
-                
+                // Log the exception
             }
 
-            
-            if (!_roleManager.RoleExistsAsync("Customer").GetAwaiter().GetResult())
+            if (!await _roleManager.RoleExistsAsync("Customer"))
             {
-                _roleManager.CreateAsync(new IdentityRole("Customer")).GetAwaiter().GetResult();
-                _roleManager.CreateAsync(new IdentityRole("Admin")).GetAwaiter().GetResult();
+                await _roleManager.CreateAsync(new IdentityRole("Customer"));
+                await _roleManager.CreateAsync(new IdentityRole("Admin"));
 
                 var adminUser = new User
                 {
@@ -51,14 +50,13 @@ namespace TechXpress.DataAccess.Dbinitializer
                     password = "123456789k",
                     PhoneNumber = "1234567890",
                 };
-                _userManager.CreateAsync(adminUser, "123456789k").GetAwaiter().GetResult();
+                await _userManager.CreateAsync(adminUser, "123456789k");
 
-                User user = _db.Users.FirstOrDefault(p => p.Email == "Youssefkamal@gmail.com");
-                _userManager.AddToRoleAsync(user, "Admin").GetAwaiter().GetResult();
+                User user = await _db.Users.FirstOrDefaultAsync(p => p.Email == "Youssefkamal@gmail.com");
+                await _userManager.AddToRoleAsync(user, "Admin");
             }
 
-          
-            if (!_db.Categories.Any())
+            if (!await _db.Categories.AnyAsync())
             {
                 var categories = new List<Category>
                 {
@@ -66,18 +64,17 @@ namespace TechXpress.DataAccess.Dbinitializer
                     new Category { Name = "Mobils" },
                     new Category { Name = "TVs" },
                 };
-                _db.Categories.AddRange(categories);
-                _db.SaveChanges();
+                await _db.Categories.AddRangeAsync(categories);
+                await _db.SaveChangesAsync();
             }
 
-            // Seed products if they don't exist
-            if (!_db.Products.Any())
+            if (!await _db.Products.AnyAsync())
             {
                 var products = new List<Product>
                 {
                     new Product
                     {
-                        CategoryId = _db.Categories.First(c => c.Name == "Electronics").Id,
+                        CategoryId = (await _db.Categories.FirstAsync(c => c.Name == "Electronics")).Id,
                         Name = "Smartphone",
                         Price = 599.99m,
                         Stock = 100,
@@ -86,43 +83,16 @@ namespace TechXpress.DataAccess.Dbinitializer
                     },
                     new Product
                     {
-                        CategoryId = _db.Categories.First(c => c.Name == "Clothing").Id,
+                        CategoryId = (await _db.Categories.FirstAsync(c => c.Name == "Mobils")).Id,
                         Name = "T-Shirt",
                         Price = 19.99m,
                         Stock = 200,
                         ImageUrl = "/images/tshirt.jpg",
                         CreatedAt = DateTime.Now
-                    },
-                    new Product
-                    {
-                        CategoryId = _db.Categories.First(c => c.Name == "Books").Id,
-                        Name = "ASP.NET Core Guide",
-                        Price = 39.99m,
-                        Stock = 50,
-                        ImageUrl = "/images/book.jpg",
-                        CreatedAt = DateTime.Now
-                    },
-                    new Product
-                    {
-                        CategoryId = _db.Categories.First(c => c.Name == "Home & Garden").Id,
-                        Name = "Plant Pot",
-                        Price = 9.99m,
-                        Stock = 150,
-                        ImageUrl = "/images/plantpot.jpg",
-                        CreatedAt = DateTime.Now
-                    },
-                    new Product
-                    {
-                        CategoryId = _db.Categories.First(c => c.Name == "Sports").Id,
-                        Name = "Football",
-                        Price = 29.99m,
-                        Stock = 80,
-                        ImageUrl = "/images/football.jpg",
-                        CreatedAt = DateTime.Now
                     }
                 };
-                _db.Products.AddRange(products);
-                _db.SaveChanges();
+                await _db.Products.AddRangeAsync(products);
+                await _db.SaveChangesAsync();
             }
         }
     }

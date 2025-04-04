@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace TechXpress.DataAccess.Dbinitializer
 {
-    public interface  IDbinitializer
+    public interface IDbinitializer
     {
-         void Initialize();
+        Task InitializeAsync();
     }
 }

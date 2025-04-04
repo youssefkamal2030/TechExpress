@@ -95,8 +95,7 @@ namespace TechXpress
                 using (var scope = app.Services.CreateScope())
                 {
                     var dbInit = scope.ServiceProvider.GetRequiredService<IDbinitializer>();
-                    await Task.Delay(5000); // Give the application time to start
-                    dbInit.Initialize();
+                    await dbInit.InitializeAsync();
                 }
             });
 
