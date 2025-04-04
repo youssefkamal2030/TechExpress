@@ -3,29 +3,55 @@
 <div class="container mt-4">
     <div class="row mb-4">
         <div class="col-md-12">
-            <form asp-action="Index" method="get" class="row g-3">
-                <div class="col-md-4">
-                    <input type="text" name="searchTerm" class="form-control" placeholder="Search products..." value="@ViewBag.SearchTerm">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form asp-action="Index" method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" name="searchTerm" class="form-control border-0 bg-light" placeholder="Search products..." value="@ViewBag.SearchTerm">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0">
+                                    <i class="bi bi-grid-3x3"></i>
+                                </span>
+                                <select name="categoryId" class="form-select border-0 bg-light">
+                                    <option value="">All Categories</option>
+                                    @foreach (var category in ViewBag.Categories)
+                                    {
+                                        <option value="@category.Id" selected="@(ViewBag.CurrentCategoryId == category.Id)">@category.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0">
+                                    <i class="bi bi-currency-dollar"></i>
+                                </span>
+                                <input type="number" name="minPrice" class="form-control border-0 bg-light" placeholder="Min Price" value="@ViewBag.MinPrice" step="0.01">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0">
+                                    <i class="bi bi-currency-dollar"></i>
+                                </span>
+                                <input type="number" name="maxPrice" class="form-control border-0 bg-light" placeholder="Max Price" value="@ViewBag.MaxPrice" step="0.01">
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-funnel me-1"></i>Filter
+                            </button>
+                        </div>
+                    </form>
                 </div>
-                <div class="col-md-3">
-                    <select name="categoryId" class="form-select">
-                        <option value="">All Categories</option>
-                        @foreach (var category in ViewBag.Categories)
-                        {
-                            <option value="@category.Id" selected="@(ViewBag.CurrentCategoryId == category.Id)">@category.Name</option>
-                        }
-                    </select>
-                </div>
-                <div class="col-md-2">
-                    <input type="number" name="minPrice" class="form-control" placeholder="Min Price" value="@ViewBag.MinPrice" step="0.01">
-                </div>
-                <div class="col-md-2">
-                    <input type="number" name="maxPrice" class="form-control" placeholder="Max Price" value="@ViewBag.MaxPrice" step="0.01">
-                </div>
-                <div class="col-md-1">
-                    <button type="submit" class="btn btn-primary w-100">Filter</button>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>
@@ -37,21 +63,37 @@
             {
                 <div class="col mb-5">
                     <div class="card h-100">
-                        <img class="card-img-top" src="@product.ImageUrl" alt="@product.Name" />
-                        <div class="card-body p-4">
-                            <div class="text-center">
-                                <h5 class="fw-bolder">@product.Name</h5>
-                                $@product.Price
+                        <!-- Product image-->
+                        <div class="position-relative">
+                            <img class="card-img-top" src="@product.ImageUrl" alt="@product.Name" />
+                            <div class="position-absolute top-0 end-0 p-2">
+                                <span class="badge bg-primary">New</span>
                             </div>
                         </div>
-     
+                        <!-- Product details-->
+                        <div class="card-body p-4">
+                            <div class="text-center">
+                                <!-- Product name-->
+                                <h5 class="fw-bolder">@product.Name</h5>
+                                <!-- Product price-->
+                                <div class="d-flex justify-content-center align-items-center">
+                                    <span class="text-muted text-decoration-line-through me-2">$@(product.Price)</span>
+                                    <span class="text-primary fw-bold">$@product.Price</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Product actions-->
                         <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
                             <div class="text-center">
-                                <a class="btn btn-outline-dark mt-auto" href="@Url.Action("Details", "Products", new { id = product.Id })">View Details</a>
-                                <form asp-action="AddToCart" asp-controller="Cart" method="post">
+                                <a class="btn btn-outline-primary mt-auto" href="@Url.Action("Details", "Product", new { id = product.Id })">
+                                    <i class="bi bi-eye me-1"></i>View Details
+                                </a>
+                                <form asp-action="AddToCart" asp-controller="Cart" method="post" class="d-inline">
                                     <input type="hidden" name="id" value="@product.Id" />
                                     <input type="hidden" name="quantity" value="1" />
-                                    <button type="submit" class="btn btn-outline-dark mt-auto">Add to cart</button>
+                                    <button type="submit" class="btn btn-primary mt-auto">
+                                        <i class="bi bi-cart-plus me-1"></i>Add to cart
+                                    </button>
                                 </form>
                             </div>
                         </div>

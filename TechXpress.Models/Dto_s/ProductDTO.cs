@@ -13,6 +13,7 @@ namespace TechXpress.Models.Dto_s
         public string CategoryName { get; set; } 
         public string Name { get; set; }
         public decimal Price { get; set; }
+        public string description { get; set; }
         public int Stock { get; set; }
         public string ImageUrl { get; set; }
         public DateTime CreatedAt { get; set; }
