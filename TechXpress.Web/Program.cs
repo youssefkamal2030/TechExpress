@@ -10,6 +10,7 @@ using TechXpress.DataAccess.Repositories;
 using TechXpress.Services.Services;
 using TechXpress.Services.Interfaces;
 using TechXpress.Models.Mappings;
+using Stripe;
 
 namespace TechXpress
 {
@@ -54,15 +55,15 @@ namespace TechXpress
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
+            builder.Services.AddMemoryCache();
             //Repso and Services Register 
             builder.Services.AddScoped<IDbinitializer, Dbinitializer>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddScoped<ProductService>();
             builder.Services.AddScoped<IShoppingCartRepository, ShoppingCartRepository>();
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
-            builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped<IProductService, TechXpress.Application.Services.ProductService>();
             builder.Services.AddScoped<IShoppingCartService, CartService>();
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddSession();
@@ -81,23 +82,26 @@ namespace TechXpress
             app.UseStaticFiles();
             app.UseRouting();
             app.UseSession();
-            SeedDb();
             app.UseAuthentication();
+            StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:secertKey").Get<string>();
             app.UseAuthorization();
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
-            app.Run();
-            void SeedDb()
+            // Run database seeding asynchronously
+            _ = Task.Run(async () =>
             {
-                using (var Scope = app.Services.CreateScope())
+                using (var scope = app.Services.CreateScope())
                 {
-                    var Dbinit = Scope.ServiceProvider.GetRequiredService<IDbinitializer>();
-                    Dbinit.Initialize();
+                    var dbInit = scope.ServiceProvider.GetRequiredService<IDbinitializer>();
+                    await Task.Delay(5000); // Give the application time to start
+                    dbInit.Initialize();
                 }
-            }
+            });
 
+            app.Run();
+           
         }   
     }
 }

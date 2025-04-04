@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using TechXpress.Services.Interfaces; // Assuming this is your service namespace
+using TechXpress.Services.Interfaces; 
 
 namespace TechXpress.Web.ViewComponents
 {

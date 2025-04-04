@@ -17,7 +17,7 @@ namespace TechXpress.Services
         {
             var options = new ChargeCreateOptions
             {
-                Amount = (long)(amount * 100), // Convert to cents
+                Amount = (long)(amount * 100), 
                 Currency = "usd",
                 Source = token,
                 Description = "TechXpress Order"
@@ -39,7 +39,7 @@ namespace TechXpress.Services
             var options = new RefundCreateOptions
             {
                 Charge = transactionId,
-                Amount = (long)(amount * 100) // Convert to cents
+                Amount = (long)(amount * 100) 
             };
             var service = new RefundService();
             try

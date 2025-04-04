@@ -1,4 +1,35 @@
 ﻿@model IEnumerable<TechXpress.Models.Dto_s.ProductDTO>
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <form asp-action="Index" method="get" class="row g-3">
+                <div class="col-md-4">
+                    <input type="text" name="searchTerm" class="form-control" placeholder="Search products..." value="@ViewBag.SearchTerm">
+                </div>
+                <div class="col-md-3">
+                    <select name="categoryId" class="form-select">
+                        <option value="">All Categories</option>
+                        @foreach (var category in ViewBag.Categories)
+                        {
+                            <option value="@category.Id" selected="@(ViewBag.CurrentCategoryId == category.Id)">@category.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" name="minPrice" class="form-control" placeholder="Min Price" value="@ViewBag.MinPrice" step="0.01">
+                </div>
+                <div class="col-md-2">
+                    <input type="number" name="maxPrice" class="form-control" placeholder="Max Price" value="@ViewBag.MaxPrice" step="0.01">
+                </div>
+                <div class="col-md-1">
+                    <button type="submit" class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <section class="py-5">
     <div class="container px-4 px-lg-5 mt-5">
         <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
@@ -6,18 +37,14 @@
             {
                 <div class="col mb-5">
                     <div class="card h-100">
-                        <!-- Product image -->
                         <img class="card-img-top" src="@product.ImageUrl" alt="@product.Name" />
-                        <!-- Product details -->
                         <div class="card-body p-4">
                             <div class="text-center">
-                                <!-- Product name -->
                                 <h5 class="fw-bolder">@product.Name</h5>
-                                <!-- Product price -->
                                 $@product.Price
                             </div>
                         </div>
-                        <!-- Product actions -->
+     
                         <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
                             <div class="text-center">
                                 <a class="btn btn-outline-dark mt-auto" href="@Url.Action("Details", "Products", new { id = product.Id })">View Details</a>
@@ -28,7 +55,6 @@
                                 </form>
                             </div>
                         </div>
-                       
                     </div>
                 </div>
             }

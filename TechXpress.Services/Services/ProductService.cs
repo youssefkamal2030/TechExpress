@@ -79,5 +79,43 @@ namespace TechXpress.Application.Services
             await _unitOfWork.Products.DeleteAsync(id);
             await _unitOfWork.SaveChangesAsync();
         }
+        public async Task<IEnumerable<CategoryDTO>> GetAllCategoriesAsync()
+        {
+            var categories = await _unitOfWork.Categories.GetAllAsync();
+            if(categories == null)
+            {
+                throw new KeyNotFoundException("No categories found.");
+            }
+            return _mapper.Map<IEnumerable<CategoryDTO>>(categories);
+        }
+
+        public async Task<IEnumerable<ProductDTO>> SearchProductsAsync(string searchTerm, int? categoryId, decimal? minPrice, decimal? maxPrice)
+        {
+            var products = await _unitOfWork.Products.GetAllAsync();
+            
+            // Apply filters
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                products = products.Where(p => p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                                             p.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (categoryId.HasValue)
+            {
+                products = products.Where(p => p.CategoryId == categoryId.Value);
+            }
+
+            if (minPrice.HasValue)
+            {
+                products = products.Where(p => p.Price >= minPrice.Value);
+            }
+
+            if (maxPrice.HasValue)
+            {
+                products = products.Where(p => p.Price <= maxPrice.Value);
+            }
+
+            return _mapper.Map<IEnumerable<ProductDTO>>(products);
+        }
     }
 }

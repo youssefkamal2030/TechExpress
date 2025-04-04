@@ -25,7 +25,7 @@ namespace TechXpress.DataAccess.Dbinitializer
 
         public void Initialize()
         {
-            // Apply any pending migrations
+            
             try
             {
                 if (_db.Database.GetPendingMigrations().Count() > 0)
@@ -35,10 +35,10 @@ namespace TechXpress.DataAccess.Dbinitializer
             }
             catch (Exception ex)
             {
-                // Log the exception if needed
+                
             }
 
-            // Seed roles and admin user
+            
             if (!_roleManager.RoleExistsAsync("Customer").GetAwaiter().GetResult())
             {
                 _roleManager.CreateAsync(new IdentityRole("Customer")).GetAwaiter().GetResult();
@@ -57,16 +57,14 @@ namespace TechXpress.DataAccess.Dbinitializer
                 _userManager.AddToRoleAsync(user, "Admin").GetAwaiter().GetResult();
             }
 
-            // Seed categories if they don't exist
+          
             if (!_db.Categories.Any())
             {
                 var categories = new List<Category>
                 {
                     new Category { Name = "Electronics" },
-                    new Category { Name = "Clothing" },
-                    new Category { Name = "Books" },
-                    new Category { Name = "Home & Garden" },
-                    new Category { Name = "Sports" }
+                    new Category { Name = "Mobils" },
+                    new Category { Name = "TVs" },
                 };
                 _db.Categories.AddRange(categories);
                 _db.SaveChanges();

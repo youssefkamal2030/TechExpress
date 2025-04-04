@@ -19,15 +19,15 @@
                             {
                                 <div class="row">
                                     <div class="col-lg-3 col-md-12 mb-4 mb-lg-0">
-                                        <img src="@item." class="w-100" alt="@item.ProductName" />
+                                        <img src="@item.ImageUrl" class="w-100" alt="@item.ProductName" />
                                     </div>
                                     <div class="col-lg-5 col-md-6 mb-4 mb-lg-0">
                                         <p><strong>@item.ProductName</strong></p>
-      
+
                                         <form asp-action="RemoveFromCart" asp-controller="Cart" method="post">
                                             <input type="hidden" name="productId" value="@item.ProductId" />
-                                            <button type="submit" class="btn btn-primary btn-sm me-1 mb-2">
-                                                <i class="fas fa-trash"></i>
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash"></i> Remove
                                             </button>
                                         </form>
                                     </div>
@@ -36,7 +36,7 @@
                                             <button class="btn btn-primary px-3 me-2" onclick="decrementQuantity(@item.ProductId)">
                                                 <i class="fas fa-minus"></i>
                                             </button>
-                                            <input id="quantity-@item.ProductId" min="0" value="@item.Quantity" type="number" class="form-control" onchange="updateQuantity(@item.ProductId, this.value)" />
+                                            <input id="quantity-@item.ProductId" min="1" value="@item.Quantity" type="number" class="form-control" onchange="updateQuantity(@item.ProductId, this.value)" />
                                             <button class="btn btn-primary px-3 ms-2" onclick="incrementQuantity(@item.ProductId)">
                                                 <i class="fas fa-plus"></i>
                                             </button>
@@ -99,7 +99,7 @@
 
         function decrementQuantity(productId) {
             var quantityInput = document.getElementById('quantity-' + productId);
-            if (quantityInput.value > 0) {
+            if (quantityInput.value > 1) {
                 quantityInput.stepDown();
                 updateQuantity(productId, quantityInput.value);
             }

@@ -16,6 +16,7 @@ namespace TechXpress.Services.Interfaces
             Task AddProductAsync(ProductDTO productDto); 
             Task UpdateProductAsync(ProductDTO productDto); 
             Task DeleteProductAsync(int id);
-       
+        Task<IEnumerable<CategoryDTO>> GetAllCategoriesAsync();
+        Task<IEnumerable<ProductDTO>> SearchProductsAsync(string searchTerm, int? categoryId, decimal? minPrice, decimal? maxPrice);
     }
 }

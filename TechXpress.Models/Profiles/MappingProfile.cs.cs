@@ -10,13 +10,13 @@ namespace TechXpress.Models.Mappings
     {
         public MappingProfile()
         {
-            // ShoppingCart <-> ShoppingCartDTO
+            
             CreateMap<ShoppingCart, ShoppingCartDTO>()
                 .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
             CreateMap<ShoppingCartDTO, ShoppingCart>()
                 .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
 
-            // CartItem <-> CartItemDTO
+            
             CreateMap<CartItem, CartItemDTO>()
                 .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name))
                 .ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.Product.ImageUrl))
