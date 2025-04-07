@@ -79,9 +79,15 @@
                                 <span><strong>@(Model?.TotalPrice ?? 0)$</strong></span>
                             </li>
                         </ul>
-                        <a href="@Url.Action("Index","Checkout")" class="btn btn-primary btn-lg btn-block"> 
+                        <a href="@Url.Action("Index","Checkout")" class="btn btn-primary btn-lg btn-block mb-2"> 
                            Go to checkout 
                          </a>
+                         @if (User.Identity.IsAuthenticated)
+                         {
+                            <a href="@Url.Action("Index","Order")" class="btn btn-outline-secondary btn-block"> 
+                               View My Orders 
+                            </a>
+                         }
                     </div>
                 </div>
             </div>

@@ -73,6 +73,7 @@ namespace TechXpress.Services.Services
                 }
             }
             return total;
+
         }
         public async Task<ShoppingCartDTO> GetCartByUserIdAsync(string userId)
         {

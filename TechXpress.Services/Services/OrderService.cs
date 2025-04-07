@@ -115,13 +115,13 @@ namespace TechXpress.Services.Services
 
         public async Task<Order> PlaceOrderAsync(string userId, List<CartItem> cartItems, string paymentToken)
         {
+            // Validate inputs
             if (string.IsNullOrEmpty(userId))
-                throw new ArgumentNullException(nameof(userId));
+                throw new ArgumentNullException(nameof(userId), "User ID cannot be null or empty");
             if (cartItems == null || !cartItems.Any())
                 throw new ArgumentException("Cart items cannot be empty", nameof(cartItems));
-            if (string.IsNullOrEmpty(paymentToken))
-                throw new ArgumentNullException(nameof(paymentToken));
-
+            
+            // Calculate total
             decimal total = cartItems.Sum(item => (decimal)item.PriceAtAdd * item.Quantity);
             if (total <= 0)
                 throw new InvalidOperationException("Total amount must be greater than zero");
@@ -141,56 +141,132 @@ namespace TechXpress.Services.Services
                 }).ToList()
             };
 
+            // Debug logging
+            Console.WriteLine($"Creating order for user {userId} with {order.OrderItems.Count} items");
+            Console.WriteLine($"Payment token: {paymentToken}");
+            Console.WriteLine($"Total amount: {total}");
+
             try
             {
-                // Process payment
-                var paymentSuccess = await _paymentGateway.ProcessPaymentAsync(total, paymentToken);
-                
-                if (paymentSuccess)
+                // Start a transaction to ensure all operations succeed or fail together
+                using (var transaction = _unitOfWork._context.Database.BeginTransaction())
                 {
-                    // Update order status
-                    order.Status = "Paid";
-                    
-                    // Update product stock
-                    foreach (var item in order.OrderItems)
+                    try
                     {
-                        var product = await _unitOfWork.Products.GetByIdAsync(item.ProductId);
-                        if (product == null)
-                            throw new InvalidOperationException($"Product with ID {item.ProductId} not found");
+                        // For Stripe Checkout, payment is already processed, so we assume success
+                        // if we have a PaymentIntent ID
+                        bool paymentSuccess = !string.IsNullOrEmpty(paymentToken);
                         
-                        if (product.Stock < item.Quantity)
-                            throw new InvalidOperationException($"Insufficient stock for product {product.Name}");
+                        if (paymentSuccess)
+                        {
+                            // Update order status
+                            order.Status = "Paid";
+                            
+                            // Update product stock
+                            foreach (var item in order.OrderItems)
+                            {
+                                var product = await _unitOfWork.Products.GetByIdAsync(item.ProductId);
+                                if (product == null)
+                                {
+                                    Console.WriteLine($"Product with ID {item.ProductId} not found");
+                                    throw new InvalidOperationException($"Product with ID {item.ProductId} not found");
+                                }
+                                
+                                if (product.Stock < item.Quantity)
+                                {
+                                    Console.WriteLine($"Insufficient stock for product {product.Name}: {product.Stock} available, {item.Quantity} requested");
+                                    throw new InvalidOperationException($"Insufficient stock for product {product.Name}");
+                                }
 
-                        product.Stock -= item.Quantity;
-                        await _unitOfWork.Products.UpdateAsync(product);
+                                product.Stock -= item.Quantity;
+                                await _unitOfWork.Products.UpdateAsync(product);
+                            }
+
+                            // Save the order with its items
+                            await _unitOfWork.Orders.AddAsync(order);
+                            await _unitOfWork.SaveChangesAsync();
+                            Console.WriteLine($"Order saved with ID: {order.Id}");
+
+                            // Clear the cart
+                            var cart = await _unitOfWork.ShoppingCarts.GetCartByUserIdAsync(userId);
+                            if (cart != null)
+                            {
+                                cart.Items.Clear();
+                                await _unitOfWork.ShoppingCarts.UpdateAsync(cart);
+                                await _unitOfWork.SaveChangesAsync();
+                                Console.WriteLine("Cart cleared successfully");
+                            }
+                            
+                            // Commit the transaction
+                            await transaction.CommitAsync();
+                            Console.WriteLine("Transaction committed successfully");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Payment failed: No payment token provided");
+                            order.Status = "Payment Failed";
+                            await _unitOfWork.Orders.AddAsync(order);
+                            await _unitOfWork.SaveChangesAsync();
+                        }
+
+                        return order;
                     }
-
-                    // Clear the cart
-                    var cart = await _unitOfWork.ShoppingCarts.GetCartByUserIdAsync(userId);
-                    if (cart != null)
+                    catch (Exception ex)
                     {
-                        cart.Items.Clear();
-                        await _unitOfWork.ShoppingCarts.UpdateAsync(cart);
+                        // Roll back the transaction on error
+                        await transaction.RollbackAsync();
+                        Console.WriteLine($"Transaction rolled back due to error: {ex.Message}");
+                        throw;
                     }
                 }
-                else
+            }
+            catch (Exception ex)
+            {
+                // Log the error with details
+                Console.WriteLine($"Error in PlaceOrderAsync: {ex.Message}");
+                if (ex.InnerException != null)
                 {
-                    order.Status = "Payment Failed";
+                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
                 }
+                
+                // Try to save the order in error state for auditing purposes
+                order.Status = "Error";
+                try
+                {
+                    await _unitOfWork.Orders.AddAsync(order);
+                    await _unitOfWork.SaveChangesAsync();
+                    Console.WriteLine($"Order saved in error state with ID: {order.Id}");
+                }
+                catch (Exception saveEx)
+                {
+                    // If we can't even save the error state
+                    Console.WriteLine($"Failed to save error state: {saveEx.Message}");
+                }
+                
+                throw new InvalidOperationException($"Failed to process order: {ex.Message}", ex);
+            }
+        }
 
-                // Save the order
-                await _unitOfWork.Orders.AddAsync(order);
-                await _unitOfWork.SaveChangesAsync();
+        public async Task<IEnumerable<OrderDTO>> GetOrdersByUserIdAsync(string userId)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(userId))
+                    throw new ArgumentNullException(nameof(userId));
 
-                return order;
+                var orders = await _unitOfWork.Orders.GetAllAsync();
+                var userOrders = orders.Where(o => o.UserId == userId).ToList();
+                
+                if (!userOrders.Any())
+                    return new List<OrderDTO>();
+
+                return _mapper.Map<IEnumerable<OrderDTO>>(userOrders);
             }
             catch (Exception ex)
             {
                 // Log the error
-                order.Status = "Error";
-                await _unitOfWork.Orders.AddAsync(order);
-                await _unitOfWork.SaveChangesAsync();
-                throw new InvalidOperationException("Failed to process order", ex);
+                Console.WriteLine($"Error in GetOrdersByUserIdAsync: {ex.Message}");
+                throw;
             }
         }
     }

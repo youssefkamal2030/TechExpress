@@ -36,7 +36,7 @@ namespace TechXpress.Web.Controllers
                   new Claim("Token", token)
               };
                 var identity = new ClaimsIdentity(claims, "CookieAuth");
-                await HttpContext.SignInAsync("CookieAuth", new ClaimsPrincipal(identity));
+                await HttpContext.SignInAsync("CookieAuth", new ClaimsPrincipal(identity));// creates a cookie across all request and initialize auth session so the app reconizes the user across requests with the auth scheme
                 return RedirectToAction("Index", "Home");
             }
             catch (Exception ex)

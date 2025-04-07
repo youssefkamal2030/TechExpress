@@ -6,7 +6,7 @@ namespace TechXpress.DataAccess.Data
 {
     public class UnitOfWork : IUnitOfWork
     {
-        private readonly TechXpressDbContext _context;
+        public TechXpressDbContext _context { get; private set; }
         public IOrderRepository Orders { get; private set; }
         public IProductRepository Products { get; private set; }
         public ICategoryRepository Categories { get; private set; }

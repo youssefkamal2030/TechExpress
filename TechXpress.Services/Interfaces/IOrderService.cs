@@ -15,5 +15,6 @@ namespace TechXpress.Services.Interfaces
         Task<Order> GetOrderByIdAsync(int id);
         Task<IEnumerable<Order>> GetAllOrdersAsync();
         Task<Order> PlaceOrderAsync(string userId, List<CartItem> cartItems, string paymentToken);
+        Task<IEnumerable<OrderDTO>> GetOrdersByUserIdAsync(string userId);
     }
 }

@@ -16,16 +16,30 @@ namespace TechXpress.DataAccess.Repositories
 
         public async Task<Order> GetByIdAsync(int id)
         {
-            return await _context.Orders.FindAsync(id);
+            return await _context.Orders
+                .Include(o => o.OrderItems)
+                .FirstOrDefaultAsync(o => o.Id == id);
         }
 
         public async Task<IEnumerable<Order>> GetAllAsync()
         {
-            return await _context.Orders.ToListAsync();
+            return await _context.Orders
+                .Include(o => o.OrderItems)
+                .ToListAsync();
         }
 
         public async Task AddAsync(Order order)
         {
+            if (order.OrderItems != null && order.OrderItems.Any())
+            {
+                foreach (var item in order.OrderItems)
+                {
+                    if (item.OrderId == 0)
+                    {
+                        item.OrderId = order.Id;
+                    }
+                }
+            }
             await _context.Orders.AddAsync(order);
         }
 

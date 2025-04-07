@@ -70,76 +70,59 @@
 @section Scripts {
     <script src="https://js.stripe.com/v3/"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Stripe Publishable Key:', '@ViewBag.StripePublishableKey');
-            
-            var stripe = Stripe('@ViewBag.StripePublishableKey');
-            var elements = stripe.elements();
-            var card = elements.create('card');
-            card.mount('#card-element');
+        console.log('Stripe Publishable Key:', '@ViewBag.StripePublishableKey');
+        
+        var stripe = Stripe('@ViewBag.StripePublishableKey');
+        var elements = stripe.elements();
+        var card = elements.create('card');
+        card.mount('#card-element');
 
-            card.addEventListener('change', function(event) {
-                var displayError = document.getElementById('card-errors');
-                if (event.error) {
-                    displayError.textContent = event.error.message;
-                    console.log('Card error:', event.error);
-                } else {
-                    displayError.textContent = '';
-                }
-            });
+        card.addEventListener('change', function(event) {
+            var displayError = document.getElementById('card-errors');
+            if (event.error) {
+                displayError.textContent = event.error.message;
+            } else {
+                displayError.textContent = '';
+            }
+        });
 
-            var form = document.getElementById('payment-form');
-            var submitButton = document.getElementById('submit-button');
-            var buttonText = document.getElementById('button-text');
-            var spinner = document.getElementById('spinner');
+        var form = document.getElementById('payment-form');
+        var submitButton = document.getElementById('submit-button');
+        var buttonText = document.getElementById('button-text');
+        var spinner = document.getElementById('spinner');
 
-            form.addEventListener('submit', async function(event) {
-                event.preventDefault();
-                console.log('Form submitted');
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
 
-                submitButton.disabled = true;
-                buttonText.textContent = 'Processing...';
-                spinner.classList.remove('d-none');
+            submitButton.disabled = true;
+            buttonText.textContent = 'Processing...';
+            spinner.classList.remove('d-none');
 
-                try {
-                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-                    console.log('Anti-forgery token:', token);
-
-                    const response = await fetch('/Checkout/CreateCheckoutSession', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'RequestVerificationToken': token
-                        },
-                        body: JSON.stringify({}) // Empty object since the server gets cart data from the session
+            fetch('/Checkout/CreateCheckoutSession', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({})
+            })
+            .then(function(response) {
+                if (!response.ok) {
+                    return response.json().then(function(data) {
+                        throw new Error(data.error || 'An error occurred');
                     });
-
-                    console.log('Response status:', response.status);
-                    
-                    if (!response.ok) {
-                        const errorData = await response.text();
-                        console.error('Error response:', errorData);
-                        throw new Error(errorData || 'An error occurred');
-                    }
-
-                    const session = await response.json();
-                    console.log('Checkout session created:', session);
-                    
-                    const result = await stripe.redirectToCheckout({
-                        sessionId: session.id
-                    });
-
-                    if (result.error) {
-                        throw new Error(result.error.message);
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    const errorElement = document.getElementById('card-errors');
-                    errorElement.textContent = error.message;
-                    submitButton.disabled = false;
-                    buttonText.textContent = 'Pay Now';
-                    spinner.classList.add('d-none');
                 }
+                return response.json();
+            })
+            .then(function(session) {
+                return stripe.redirectToCheckout({ sessionId: session.id });
+            })
+            .catch(function(error) {
+                var errorElement = document.getElementById('card-errors');
+                errorElement.textContent = error.message;
+                submitButton.disabled = false;
+                buttonText.textContent = 'Pay Now';
+                spinner.classList.add('d-none');
             });
         });
     </script>

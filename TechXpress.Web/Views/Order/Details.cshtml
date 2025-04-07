@@ -1,0 +1,141 @@
+@model TechXpress.Models.entitis.Order
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12 mb-4">
+            <a href="@Url.Action("Index", "Order")" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left me-2"></i>Back to Orders
+            </a>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3">
+                    <h4 class="mb-0">Order Details</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <h6 class="text-muted">Order Number</h6>
+                            <h5># @Model.Id</h5>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted">Order Date</h6>
+                            <h5>@Model.OrderDate.ToString("MMM dd, yyyy")</h5>
+                        </div>
+                        <div class="col-md-4">
+                            <h6 class="text-muted">Order Status</h6>
+                            @switch (Model.Status)
+                            {
+                                case "Paid":
+                                    <h5><span class="badge bg-success">@Model.Status</span></h5>
+                                    break;
+                                case "Pending":
+                                    <h5><span class="badge bg-warning text-dark">@Model.Status</span></h5>
+                                    break;
+                                case "Shipped":
+                                    <h5><span class="badge bg-info">@Model.Status</span></h5>
+                                    break;
+                                case "Delivered":
+                                    <h5><span class="badge bg-primary">@Model.Status</span></h5>
+                                    break;
+                                case "Cancelled":
+                                    <h5><span class="badge bg-danger">@Model.Status</span></h5>
+                                    break;
+                                default:
+                                    <h5><span class="badge bg-secondary">@Model.Status</span></h5>
+                                    break;
+                            }
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <h5 class="mb-3">Products</h5>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Product</th>
+                                    <th>Price</th>
+                                    <th>Quantity</th>
+                                    <th class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.OrderItems)
+                                {
+                                    <tr>
+                                        <td>
+                                            <a href="@Url.Action("Details", "Product", new { id = item.ProductId })" class="text-decoration-none">
+                                                @(item.Product?.Name ?? $"Product #{item.ProductId}")
+                                            </a>
+                                        </td>
+                                        <td>$@item.UnitPrice.ToString("F2")</td>
+                                        <td>@item.Quantity</td>
+                                        <td class="text-end">$@((item.UnitPrice * item.Quantity).ToString("F2"))</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3">
+                    <h4 class="mb-0">Order Summary</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 pb-0">
+                            Items (@Model.OrderItems.Sum(i => i.Quantity))
+                            <span>$@Model.TotalAmount.ToString("F2")</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            Shipping
+                            <span>Free</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                            Tax
+                            <span>Included</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center border-0 px-0 mb-3">
+                            <div>
+                                <strong>Total</strong>
+                            </div>
+                            <span><strong>$@Model.TotalAmount.ToString("F2")</strong></span>
+                        </li>
+                    </ul>
+                    
+                    @if (Model.Status == "Paid" || Model.Status == "Pending")
+                    {
+                        <a href="#" class="btn btn-outline-danger btn-block w-100">
+                            <i class="bi bi-x-circle me-2"></i>Cancel Order
+                        </a>
+                    }
+                </div>
+            </div>
+            
+            <div class="card shadow-sm">
+                <div class="card-header py-3">
+                    <h4 class="mb-0">Need Help?</h4>
+                </div>
+                <div class="card-body">
+                    <p>Have questions about your order?</p>
+                    <a href="#" class="btn btn-outline-primary btn-block w-100 mb-2">
+                        <i class="bi bi-question-circle me-2"></i>Help Center
+                    </a>
+                    <a href="#" class="btn btn-outline-primary btn-block w-100">
+                        <i class="bi bi-chat-dots me-2"></i>Contact Support
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> 
