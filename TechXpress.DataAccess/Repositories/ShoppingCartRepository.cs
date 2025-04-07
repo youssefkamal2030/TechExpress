@@ -61,6 +61,7 @@ namespace TechXpress.DataAccess.Repositories
         {
             return await _context.ShoppingCarts
                 .Include(c => c.Items)
+                .ThenInclude(i => i.Product)
                 .FirstOrDefaultAsync(c => c.ApplicationUserId == userId);
         }
 
