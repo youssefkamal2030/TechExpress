@@ -13,6 +13,6 @@ namespace TechXpress.Models.Dto_s
         public DateTime OrderDate { get; set; }
         public string Status { get; set; }
         public decimal TotalAmount { get; set; }
-        public List<OrderItemDTO> OrderItems { get; set; } // Nested DTOs for items
+        public List<OrderItemDTO> OrderItems { get; set; } 
     }
 }

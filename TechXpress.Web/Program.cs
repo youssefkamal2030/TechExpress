@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TechXpress.DataAccess.Interfaces;
-using TechXpress.Application.Services;
+using TechXpress.Services.Services;
 using TechXpress.DataAccess.Dbinitializer;
 using TechXpress.DataAccess.Data;
 using TechXpress.Models.entitis;
@@ -11,6 +11,9 @@ using TechXpress.Services.Services;
 using TechXpress.Services.Interfaces;
 using TechXpress.Models.Mappings;
 using Stripe;
+using TechXpress.Models.Configuration;
+using AutoMapper;
+using Microsoft.Data.SqlClient;
 
 namespace TechXpress
 {
@@ -20,9 +23,13 @@ namespace TechXpress
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Configure Database Context
+            // Configure Database Context with retry policy
             builder.Services.AddDbContext<TechXpressDbContext>(options =>
-     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            {
+                options.UseSqlServer(
+                    builder.Configuration.GetConnectionString("DefaultConnection"));
+            });
+
             // Add Identity Services
             builder.Services.AddDefaultIdentity<User>(options =>
             {
@@ -37,17 +44,20 @@ namespace TechXpress
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<TechXpressDbContext>()
             .AddDefaultTokenProviders();
+
             builder.Services.ConfigureApplicationCookie(options =>
             {
                 options.LoginPath = "/Account/SignIn";
                 options.AccessDeniedPath = "/Account/AccessDenied";
             });
+
             builder.Services.AddAutoMapper(typeof(MappingProfile));
             builder.Services.AddAuthentication("CookieAuth")
-            .AddCookie("CookieAuth", options =>
-            {
-        options.LoginPath = "/Account/Login";
-            });
+                .AddCookie("CookieAuth", options =>
+                {
+                    options.LoginPath = "/Account/Login";
+                });
+
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
             {
@@ -56,15 +66,30 @@ namespace TechXpress
                 options.Cookie.IsEssential = true;
             });
             builder.Services.AddMemoryCache();
-            //Repso and Services Register 
+
+            // Repository and Services Registration 
             builder.Services.AddScoped<IDbinitializer, Dbinitializer>();
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IShoppingCartRepository, ShoppingCartRepository>();
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
-            builder.Services.AddScoped<IProductService, TechXpress.Application.Services.ProductService>();
+            builder.Services.AddScoped<IProductService, TechXpress.Services.Services.ProductService>();
             builder.Services.AddScoped<IShoppingCartService, CartService>();
+            builder.Services.AddScoped<IOrderService, TechXpress.Services.Services.OrderService>();
+
+            // Configure Stripe Settings
+            var stripeSettings = builder.Configuration.GetSection("Stripe").Get<StripeSettings>();
+            builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+            StripeConfiguration.ApiKey = stripeSettings.SecretKey;
+
+            // Register StripePaymentGateway with configuration
+            builder.Services.AddScoped<IPaymentGateway>(provider => 
+                new StripePaymentGateway(
+                    stripeSettings.SecretKey,
+                    provider.GetRequiredService<IMapper>()
+                ));
+
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddSession();
             builder.Services.AddControllersWithViews();
@@ -83,8 +108,8 @@ namespace TechXpress
             app.UseRouting();
             app.UseSession();
             app.UseAuthentication();
-            StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:secertKey").Get<string>();
             app.UseAuthorization();
+
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
@@ -100,7 +125,6 @@ namespace TechXpress
             });
 
             app.Run();
-           
         }   
     }
 }

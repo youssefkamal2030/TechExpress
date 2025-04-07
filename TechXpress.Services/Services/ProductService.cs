@@ -8,7 +8,7 @@ using TechXpress.Models.Dto_s;
 using TechXpress.Models.entitis;
 using TechXpress.Services.Interfaces;
 
-namespace TechXpress.Application.Services
+namespace TechXpress.Services.Services
 {
     public class ProductService : IProductService
     {

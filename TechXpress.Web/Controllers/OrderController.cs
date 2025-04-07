@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Stripe.Climate;
 using System.Security.Claims;
-using TechXpress.Application.Services;
+using TechXpress.Services.Services;
 using TechXpress.Models.entitis;
 using TechXpress.Services.Interfaces;
 

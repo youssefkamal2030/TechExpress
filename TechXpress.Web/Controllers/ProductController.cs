@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TechXpress.Application.Services;
+using TechXpress.Services.Services;
 using TechXpress.Models.Dto_s;
 using TechXpress.Models.entitis;
 using TechXpress.Services.Interfaces;

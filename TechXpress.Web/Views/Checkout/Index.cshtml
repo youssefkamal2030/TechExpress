@@ -1,0 +1,125 @@
+@model TechXpress.Models.Dto_s.ShoppingCartDTO
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<div class="container py-5">
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">Order Summary</h4>
+                </div>
+                <div class="card-body">
+                    @if (Model?.Items != null && Model.Items.Any())
+                    {
+                        foreach (var item in Model.Items)
+                        {
+                            <div class="row mb-3">
+                                <div class="col-md-2">
+                                    <img src="@item.ImageUrl" class="img-fluid rounded" alt="@item.ProductName">
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>@item.ProductName</h5>
+                                    <p class="text-muted">Quantity: @item.Quantity</p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <h5>$@(item.PriceAtAdd * item.Quantity)</h5>
+                                </div>
+                            </div>
+                            <hr />
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h4 class="mb-0">Payment Details</h4>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h5>Total Amount</h5>
+                        <h3 class="text-primary">$@Model?.TotalPrice</h3>
+                    </div>
+                    <div id="payment-form">
+                        <div id="card-element" class="form-control mb-3"></div>
+                        <div id="card-errors" class="text-danger mb-3"></div>
+                        <button id="submit-button" class="btn btn-primary w-100">
+                            <span id="button-text">Pay Now</span>
+                            <span id="spinner" class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        var stripe = Stripe('@ViewBag.StripePublishableKey');
+        var elements = stripe.elements();
+        var card = elements.create('card');
+        card.mount('#card-element');
+
+        card.addEventListener('change', function(event) {
+            var displayError = document.getElementById('card-errors');
+            if (event.error) {
+                displayError.textContent = event.error.message;
+            } else {
+                displayError.textContent = '';
+            }
+        });
+
+        var form = document.getElementById('payment-form');
+        var submitButton = document.getElementById('submit-button');
+        var buttonText = document.getElementById('button-text');
+        var spinner = document.getElementById('spinner');
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            submitButton.disabled = true;
+            buttonText.textContent = 'Processing...';
+            spinner.classList.remove('d-none');
+
+            fetch('/Checkout/CreateCheckoutSession', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            })
+            .then(function(response) {
+                if (!response.ok) {
+                    return response.json().then(function(data) {
+                        throw new Error(data.error || 'An error occurred');
+                    });
+                }
+                return response.json();
+            })
+            .then(function(session) {
+                return stripe.redirectToCheckout({ sessionId: session.id });
+            })
+            .catch(function(error) {
+                var errorElement = document.getElementById('card-errors');
+                errorElement.textContent = error.message;
+                submitButton.disabled = false;
+                buttonText.textContent = 'Pay Now';
+                spinner.classList.add('d-none');
+            });
+        });
+    </script>
+} 
