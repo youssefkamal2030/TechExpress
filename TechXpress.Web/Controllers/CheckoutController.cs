@@ -5,6 +5,7 @@ using Stripe.Checkout;
 using TechXpress.Models.entitis;
 using TechXpress.Services.Interfaces;
 using TechXpress.Models.Dto_s;
+using System.Security.Claims;
 
 namespace TechXpress.Web.Controllers
 {
@@ -145,51 +146,34 @@ namespace TechXpress.Web.Controllers
             {
                 if (string.IsNullOrEmpty(sessionId))
                 {
-                    _logger.LogWarning("Session ID is null or empty");
                     TempData["ErrorMessage"] = "Invalid checkout session.";
                     return RedirectToAction("Index", "Cart");
                 }
 
-                var service = new SessionService();
-                Session session;
-                
-                try
+                var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(userId))
                 {
-                    session = await service.GetAsync(sessionId);
-                    _logger.LogInformation($"Retrieved Stripe session {sessionId} with payment status: {session.PaymentStatus}");
+                    TempData["ErrorMessage"] = "User not authenticated.";
+                    return RedirectToAction("Login", "Account");
                 }
-                catch (StripeException stripeEx)
-                {
-                    _logger.LogError(stripeEx, $"Stripe error retrieving session {sessionId}: {stripeEx.Message}");
-                    TempData["ErrorMessage"] = "Error retrieving payment information from Stripe.";
-                    return RedirectToAction("Index", "Cart");
-                }
-                
-                // Get the current user ID
-                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                _logger.LogInformation($"Current user ID: {userId}");
-                
-                // Get the user ID from session metadata
-                var sessionUserId = session.Metadata.ContainsKey("userId") ? session.Metadata["userId"] : null;
-                _logger.LogInformation($"Session user ID: {sessionUserId}");
 
-                // Verify the session belongs to the current user
+                var service = new SessionService();
+                var session = await service.GetAsync(sessionId);
+                
+                var sessionUserId = session.Metadata.ContainsKey("userId") ? session.Metadata["userId"] : null;
+
                 if (sessionUserId != userId)
                 {
-                    _logger.LogWarning($"Session {sessionId} belongs to user {sessionUserId} but current user is {userId}");
                     TempData["ErrorMessage"] = "This payment session doesn't belong to you.";
                     return RedirectToAction("Index", "Cart");
                 }
 
                 if (session.PaymentStatus == "paid")
                 {
-                    _logger.LogInformation($"Payment status is 'paid' for session {sessionId} with PaymentIntentId: {session.PaymentIntentId}");
                     var cart = await _cartService.GetCartByUserIdAsync(userId);
                     
                     if (cart != null && cart.Items.Any())
                     {
-                        _logger.LogInformation($"Found cart with {cart.Items.Count} items for user {userId}");
-                        
                         var cartItems = cart.Items.Select(dto => new CartItem
                         {
                             ProductId = dto.ProductId,
@@ -197,51 +181,36 @@ namespace TechXpress.Web.Controllers
                             PriceAtAdd = dto.PriceAtAdd
                         }).ToList();
 
-                        _logger.LogInformation($"Mapped {cartItems.Count} cart items for order placement");
-
-                        try {
-                            _logger.LogInformation($"Calling OrderService.PlaceOrderAsync for user {userId} with {cartItems.Count} items and payment intent {session.PaymentIntentId ?? "null"}");
+                        try
+                        {
                             var order = await _orderService.PlaceOrderAsync(userId, cartItems, session.PaymentIntentId ?? sessionId);
                             
-                            _logger.LogInformation($"Order created successfully with ID: {order.Id}, Status: {order.Status}");
-                            if (!string.IsNullOrEmpty(order.Status) && order.Status == "Paid")
+                            if (order.Status == "Paid")
                             {
                                 return View("Success", order);
                             }
-                            else 
-                            {
-                                _logger.LogWarning($"Order created with non-Paid status: {order.Status}");
-                                TempData["ErrorMessage"] = "Your payment was processed, but there was an issue with your order status.";
-                                return RedirectToAction("Index", "Cart");
-                            }
-                        }
-                        catch (Exception ex) {
-                            _logger.LogError(ex, $"Error in PlaceOrderAsync: {ex.Message}");
-                            if (ex.InnerException != null) {
-                                _logger.LogError($"Inner exception: {ex.InnerException.Message}");
-                            }
                             
-                            TempData["ErrorMessage"] = "Your payment was processed, but there was an error creating your order. Please contact support.";
-                            return RedirectToAction("Index", "Home");
+                            TempData["ErrorMessage"] = "Your payment was processed, but there was an issue with your order status.";
+                            return RedirectToAction("Index", "Cart");
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Error creating order for user {UserId}", userId);
+                            TempData["ErrorMessage"] = "There was an error processing your order. Please contact support.";
+                            return RedirectToAction("Index", "Cart");
                         }
                     }
-                    else
-                    {
-                        _logger.LogWarning($"Cart is null or empty for user {userId}");
-                        TempData["ErrorMessage"] = "Your payment was processed, but your cart is empty. Please contact support.";
-                        return RedirectToAction("Index", "Home");
-                    }
+                    
+                    TempData["ErrorMessage"] = "Your payment was processed, but your cart is empty.";
+                    return RedirectToAction("Index", "Home");
                 }
-                else
-                {
-                    _logger.LogWarning($"Payment status is '{session.PaymentStatus}' for session {sessionId}");
-                    TempData["ErrorMessage"] = "Your payment was not successful. Please try again.";
-                    return RedirectToAction("Index", "Cart");
-                }
+                
+                TempData["ErrorMessage"] = "Your payment was not successful. Please try again.";
+                return RedirectToAction("Index", "Cart");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unhandled error processing successful payment: {Message}", ex.Message);
+                _logger.LogError(ex, "Error processing successful payment");
                 TempData["ErrorMessage"] = "An error occurred while processing your payment.";
                 return RedirectToAction("Index", "Cart");
             }

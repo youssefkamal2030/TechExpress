@@ -11,10 +11,12 @@ namespace TechXpress.Web.Controllers
     public class AccountController : Controller
     {
         private readonly IAuthService _authService;
+        private readonly UserManager<User> _userManager;
 
-        public AccountController(IAuthService authService)
+        public AccountController(IAuthService authService, UserManager<User> userManager)
         {
             _authService = authService;
+            _userManager = userManager;
         }
 
         public IActionResult Login()
@@ -27,16 +29,27 @@ namespace TechXpress.Web.Controllers
         {
             try
             {
+                // First verify credentials
                 var user = new User { Email = email, password = password };
                 var token = await _authService.LoginUserAsync(user);
+
+                // Get the actual user from database
+                var dbUser = await _userManager.FindByEmailAsync(email);
+                if (dbUser == null)
+                {
+                    ViewBag.Error = "Invalid login attempt.";
+                    return View();
+                }
+
                 var claims = new List<Claim>
-              {
-                  new Claim (ClaimTypes.Name , email),
-                  new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                  new Claim("Token", token)
-              };
+                {
+                    new Claim(ClaimTypes.Name, email),
+                    new Claim(ClaimTypes.NameIdentifier, dbUser.Id),
+                    new Claim("Token", token)
+                };
+
                 var identity = new ClaimsIdentity(claims, "CookieAuth");
-                await HttpContext.SignInAsync("CookieAuth", new ClaimsPrincipal(identity));// creates a cookie across all request and initialize auth session so the app reconizes the user across requests with the auth scheme
+                await HttpContext.SignInAsync("CookieAuth", new ClaimsPrincipal(identity));
                 return RedirectToAction("Index", "Home");
             }
             catch (Exception ex)
@@ -65,13 +78,20 @@ namespace TechXpress.Web.Controllers
             {
                 try
                 {
-                    await _authService.RegisterUserAsync(user);
-                    return RedirectToAction("Login");
+                    var result = await _userManager.CreateAsync(user, user.password);
+                    if (result.Succeeded)
+                    {
+                        return RedirectToAction("Login");
+                    }
+                    
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError(string.Empty, error.Description);
+                    }
                 }
                 catch (Exception ex)
                 {
                     ModelState.AddModelError(string.Empty, ex.Message);
-                    return View(user);
                 }
             }
             return View(user);

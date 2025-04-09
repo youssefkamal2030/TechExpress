@@ -115,18 +115,15 @@ namespace TechXpress.Services.Services
 
         public async Task<Order> PlaceOrderAsync(string userId, List<CartItem> cartItems, string paymentToken)
         {
-            // Validate inputs
             if (string.IsNullOrEmpty(userId))
                 throw new ArgumentNullException(nameof(userId), "User ID cannot be null or empty");
             if (cartItems == null || !cartItems.Any())
                 throw new ArgumentException("Cart items cannot be empty", nameof(cartItems));
             
-            // Calculate total
             decimal total = cartItems.Sum(item => (decimal)item.PriceAtAdd * item.Quantity);
             if (total <= 0)
                 throw new InvalidOperationException("Total amount must be greater than zero");
             
-            // Create the order
             var order = new Order
             {
                 UserId = userId,
@@ -141,25 +138,22 @@ namespace TechXpress.Services.Services
                 }).ToList()
             };
 
-            // Debug logging
-            Console.WriteLine($"Creating order for user {userId} with {order.OrderItems.Count} items");
-            Console.WriteLine($"Payment token: {paymentToken}");
-            Console.WriteLine($"Total amount: {total}");
-
             try
             {
-                // Start a transaction to ensure all operations succeed or fail together
                 using (var transaction = _unitOfWork._context.Database.BeginTransaction())
                 {
                     try
                     {
-                        // For Stripe Checkout, payment is already processed, so we assume success
-                        // if we have a PaymentIntent ID
-                        bool paymentSuccess = !string.IsNullOrEmpty(paymentToken);
+                        // Verify payment status with Stripe
+                        bool paymentSuccess = false;
+                        if (!string.IsNullOrEmpty(paymentToken))
+                        {
+                            var paymentDetails = await _paymentGateway.GetPaymentDetailsAsync(paymentToken);
+                            paymentSuccess = paymentDetails.Status == "succeeded";
+                        }
                         
                         if (paymentSuccess)
                         {
-                            // Update order status
                             order.Status = "Paid";
                             
                             // Update product stock
@@ -167,25 +161,18 @@ namespace TechXpress.Services.Services
                             {
                                 var product = await _unitOfWork.Products.GetByIdAsync(item.ProductId);
                                 if (product == null)
-                                {
-                                    Console.WriteLine($"Product with ID {item.ProductId} not found");
                                     throw new InvalidOperationException($"Product with ID {item.ProductId} not found");
-                                }
                                 
                                 if (product.Stock < item.Quantity)
-                                {
-                                    Console.WriteLine($"Insufficient stock for product {product.Name}: {product.Stock} available, {item.Quantity} requested");
                                     throw new InvalidOperationException($"Insufficient stock for product {product.Name}");
-                                }
 
                                 product.Stock -= item.Quantity;
                                 await _unitOfWork.Products.UpdateAsync(product);
                             }
 
-                            // Save the order with its items
+                            // Save the order
                             await _unitOfWork.Orders.AddAsync(order);
                             await _unitOfWork.SaveChangesAsync();
-                            Console.WriteLine($"Order saved with ID: {order.Id}");
 
                             // Clear the cart
                             var cart = await _unitOfWork.ShoppingCarts.GetCartByUserIdAsync(userId);
@@ -194,16 +181,12 @@ namespace TechXpress.Services.Services
                                 cart.Items.Clear();
                                 await _unitOfWork.ShoppingCarts.UpdateAsync(cart);
                                 await _unitOfWork.SaveChangesAsync();
-                                Console.WriteLine("Cart cleared successfully");
                             }
                             
-                            // Commit the transaction
                             await transaction.CommitAsync();
-                            Console.WriteLine("Transaction committed successfully");
                         }
                         else
                         {
-                            Console.WriteLine("Payment failed: No payment token provided");
                             order.Status = "Payment Failed";
                             await _unitOfWork.Orders.AddAsync(order);
                             await _unitOfWork.SaveChangesAsync();
@@ -211,36 +194,25 @@ namespace TechXpress.Services.Services
 
                         return order;
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
-                        // Roll back the transaction on error
                         await transaction.RollbackAsync();
-                        Console.WriteLine($"Transaction rolled back due to error: {ex.Message}");
                         throw;
                     }
                 }
             }
             catch (Exception ex)
             {
-                // Log the error with details
-                Console.WriteLine($"Error in PlaceOrderAsync: {ex.Message}");
-                if (ex.InnerException != null)
-                {
-                    Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
-                }
-                
-                // Try to save the order in error state for auditing purposes
+                // Save the order in error state for auditing
                 order.Status = "Error";
                 try
                 {
                     await _unitOfWork.Orders.AddAsync(order);
                     await _unitOfWork.SaveChangesAsync();
-                    Console.WriteLine($"Order saved in error state with ID: {order.Id}");
                 }
-                catch (Exception saveEx)
+                catch 
                 {
-                    // If we can't even save the error state
-                    Console.WriteLine($"Failed to save error state: {saveEx.Message}");
+                    throw new Exception("Error while saving the order");
                 }
                 
                 throw new InvalidOperationException($"Failed to process order: {ex.Message}", ex);
