@@ -9,7 +9,7 @@
         <h6 class="m-0 font-weight-bold text-primary">Edit Product</h6>
     </div>
     <div class="card-body">
-        <form asp-action="EditProduct" method="post">
+        <form asp-controller="Admin" asp-action="EditProduct"  method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
             
@@ -23,13 +23,14 @@
                     
                     <div class="mb-3">
                         <label asp-for="CategoryId" class="form-label">Category</label>
-                        <select asp-for="CategoryId" class="form-select">
+                        <select asp-for="CategoryId" class="form-select" id="categorySelect" onchange="updateCategoryName()">
                             <option value="">-- Select Category --</option>
                             @foreach (var category in ViewBag.Categories)
                             {
-                                <option value="@category.Id" selected="@(Model.CategoryId == category.Id)">@category.Name</option>
+                                <option value="@category.Id" selected="@(Model.CategoryId == category.Id)" data-name="@category.Name">@category.Name</option>
                             }
                         </select>
+                        <input type="hidden" asp-for="CategoryName" id="categoryNameField" />
                         <span asp-validation-for="CategoryId" class="text-danger"></span>
                     </div>
                     
@@ -103,4 +104,38 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Update image preview when URL changes
+        document.getElementById('ImageUrl').addEventListener('change', function() {
+            const preview = document.getElementById('imagePreview');
+            const noImageMsg = document.getElementById('noImageMsg');
+            
+            if (this.value) {
+                preview.src = this.value;
+                preview.classList.remove('d-none');
+                noImageMsg.classList.add('d-none');
+            } else {
+                preview.classList.add('d-none');
+                noImageMsg.classList.remove('d-none');
+            }
+        });
+        
+        // Set category name based on selected category
+        function updateCategoryName() {
+            const select = document.getElementById('categorySelect');
+            const selectedOption = select.options[select.selectedIndex];
+            const nameField = document.getElementById('categoryNameField');
+            
+            if (selectedOption) {
+                nameField.value = selectedOption.dataset.name || '';
+            } else {
+                nameField.value = '';
+            }
+        }
+        
+        // Initialize category name on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCategoryName();
+        });
+    </script>
 } 

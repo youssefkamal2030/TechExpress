@@ -65,22 +65,25 @@
             <div class="card-body">
                 <div class="mb-3">
                     <h6 class="font-weight-bold">Status</h6>
-                    @if (Model.Status.ToString() == "Completed")
-                    {
-                        <span class="badge bg-success">@Model.Status</span>
-                    }
-                    else if (Model.Status.ToString() == "Processing")
-                    {
-                        <span class="badge bg-primary">@Model.Status</span>
-                    }
-                    else if (Model.Status.ToString() == "Cancelled")
-                    {
-                        <span class="badge bg-danger">@Model.Status</span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-secondary">@Model.Status</span>
-                    }
+                    <div class="mb-2">
+                        <span class="badge status-badge bg-success">@Model.Status</span>
+                    </div>
+                    <form asp-action="UpdateOrderStatus" asp-controller="Admin" method="post" class="status-form">
+                        <input type="hidden" name="orderId" value="@Model.Id" />
+                        <div class="d-flex align-items-center">
+                            <select name="status" class="form-select form-select-sm status-select" aria-label="Order status" onchange="toggleUpdateButton(this)">
+                                <option value="Pending" selected="@(Model.Status.ToString() == "Pending")">Pending</option>
+                                <option value="Processing" selected="@(Model.Status.ToString() == "Processing")">Processing</option>
+                                <option value="Shipped" selected="@(Model.Status.ToString() == "Shipped")">Shipped</option>
+                                <option value="Delivered" selected="@(Model.Status.ToString() == "Delivered")">Delivered</option>
+                                <option value="Completed" selected="@(Model.Status.ToString() == "Completed")">Completed</option>
+                                <option value="Cancelled" selected="@(Model.Status.ToString() == "Cancelled")">Cancelled</option>
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-outline-primary ms-2 update-btn" style="display: none;">
+                                <i class="bi bi-check"></i> Update
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
                 <div class="mb-3">
@@ -104,4 +107,48 @@
             </div>
         </div>
     </div>
-</div> 
+</div>
+
+
+@section Scripts {
+    <script>
+        // Add confirmation before status update
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusForm = document.querySelector('.status-form');
+            
+            if (statusForm) {
+                statusForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const select = document.querySelector('.status-select');
+                    const statusText = select.options[select.selectedIndex].text;
+                    
+                    if (confirm('Are you sure you want to change the order status to "' + statusText + '"?')) {
+                        this.submit();
+                    }
+                });
+            }
+        });
+        
+        // Toggle update button visibility based on selection change
+        function toggleUpdateButton(selectElement) {
+            const form = selectElement.closest('form');
+            const currentStatus = document.querySelector('.status-badge').textContent.trim();
+            const selectedStatus = selectElement.options[selectElement.selectedIndex].text;
+            const updateButton = form.querySelector('.update-btn');
+            
+            if (currentStatus !== selectedStatus) {
+                updateButton.style.display = 'block';
+            } else {
+                updateButton.style.display = 'none';
+            }
+        }
+    </script>
+    
+    <style>
+        .status-badge {
+            font-size: 1rem;
+            padding: 0.5rem 0.75rem;
+        }
+    </style>
+} 

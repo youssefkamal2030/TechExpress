@@ -31,7 +31,6 @@ namespace TechXpress.Services.Services
                     throw new ArgumentNullException(nameof(orderDto));
 
                 var order = _mapper.Map<Order>(orderDto);
-                // Set hard-coded status
                 order.Status = "not paid";
                 await _unitOfWork.Orders.AddAsync(order);
                 await _unitOfWork.SaveChangesAsync();
@@ -39,7 +38,6 @@ namespace TechXpress.Services.Services
             }
             catch (Exception ex)
             {
-                // Log the error
                 return false;
             }
         }
@@ -56,7 +54,6 @@ namespace TechXpress.Services.Services
                     throw new KeyNotFoundException($"Order with ID {orderDto.Id} not found");
 
                 var order = _mapper.Map<Order>(orderDto);
-                // Preserve the existing status or set to "not paid" if null
                 order.Status = existingOrder.Status ?? "not paid";
                 await _unitOfWork.Orders.UpdateAsync(order);
                 await _unitOfWork.SaveChangesAsync();
@@ -64,7 +61,6 @@ namespace TechXpress.Services.Services
             }
             catch (Exception ex)
             {
-                // Log the error
                 return false;
             }
         }
@@ -83,7 +79,6 @@ namespace TechXpress.Services.Services
             }
             catch (Exception ex)
             {
-                // Log the error
                 return false;
             }
         }
@@ -100,7 +95,6 @@ namespace TechXpress.Services.Services
             }
             catch (Exception ex)
             {
-                // Log the error
                 throw;
             }
         }
@@ -133,7 +127,6 @@ namespace TechXpress.Services.Services
             if (total <= 0)
                 throw new InvalidOperationException("Total amount must be greater than zero");
             
-            // Get the user to retrieve their email
             var user = await _unitOfWork.GetContext().Users.FindAsync(userId);
             if (user == null)
                 throw new KeyNotFoundException($"User with ID {userId} not found");
@@ -159,7 +152,6 @@ namespace TechXpress.Services.Services
                 {
                     try
                     {
-                        // Verify payment status with Stripe
                         bool paymentSuccess = false;
                         if (!string.IsNullOrEmpty(paymentToken))
                         {
@@ -171,7 +163,6 @@ namespace TechXpress.Services.Services
                         {
                             order.Status = "paid";
                             
-                            // Update product stock
                             foreach (var item in order.OrderItems)
                             {
                                 var product = await _unitOfWork.Products.GetByIdAsync(item.ProductId);
@@ -185,27 +176,22 @@ namespace TechXpress.Services.Services
                                 await _unitOfWork.Products.UpdateAsync(product);
                             }
 
-                            // Save the order
                             await _unitOfWork.Orders.AddAsync(order);
                             await _unitOfWork.SaveChangesAsync();
                             
-                            // Commit transaction
                             transaction.Commit();
                             
-                            // Map to DTO and add the user email
                             var orderDTO = _mapper.Map<OrderDTO>(order);
                             orderDTO.UserEmail = user.Email;
                             return orderDTO;
                         }
                         else
                         {
-                            // Payment failed
                             throw new InvalidOperationException("Payment failed");
                         }
                     }
                     catch (Exception ex)
                     {
-                        // Rollback transaction
                         transaction.Rollback();
                         throw;
                     }
@@ -234,7 +220,6 @@ namespace TechXpress.Services.Services
             }
             catch (Exception ex)
             {
-                // Log the error
                 Console.WriteLine($"Error in GetOrdersByUserIdAsync: {ex.Message}");
                 throw;
             }
@@ -248,18 +233,7 @@ namespace TechXpress.Services.Services
                 if (order == null)
                     throw new KeyNotFoundException($"Order with ID {orderId} not found");
 
-                // Set hard-coded status based on string value
-                if (status.Equals("Processing", StringComparison.OrdinalIgnoreCase) || 
-                    status.Equals("Shipped", StringComparison.OrdinalIgnoreCase) || 
-                    status.Equals("Delivered", StringComparison.OrdinalIgnoreCase))
-                {
-                    order.Status = "paid";
-                }
-                else
-                {
-                    order.Status = "not paid";
-                }
-                
+                order.Status = status;
                 order.StatusUpdatedAt = DateTime.UtcNow;
                 await _unitOfWork.Orders.UpdateAsync(order);
                 await _unitOfWork.SaveChangesAsync();
@@ -267,7 +241,6 @@ namespace TechXpress.Services.Services
             }
             catch (Exception ex)
             {
-                // Log the error
                 return false;
             }
         }
@@ -286,7 +259,6 @@ namespace TechXpress.Services.Services
             }
             catch (Exception ex)
             {
-                // Log the error
                 throw;
             }
         }
@@ -296,7 +268,6 @@ namespace TechXpress.Services.Services
             try
             {
                 var orders = await _unitOfWork.Orders.GetAllWithUserAndItemsAsync();
-                // Replace status filtering with "paid" or "not paid"
                 string statusFilter;
                 
                 if (status.Equals("Processing", StringComparison.OrdinalIgnoreCase) || 
@@ -319,7 +290,6 @@ namespace TechXpress.Services.Services
             }
             catch (Exception ex)
             {
-                // Log the error
                 throw;
             }
         }

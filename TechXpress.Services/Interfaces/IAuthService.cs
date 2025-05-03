@@ -13,5 +13,7 @@ namespace TechXpress.Services.Interfaces
         Task<bool> RegisterUserAsync(User user);
         Task<string> LoginUserAsync(User user);
         Task<IEnumerable<UserDTO>> GetAllUsersAsync();
+        Task<bool> UpdateUserRolesAsync(string userId, List<string> roles);
+        Task<bool> DeleteUserAsync(string userId);
     }
 }

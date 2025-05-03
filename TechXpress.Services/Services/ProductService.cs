@@ -23,7 +23,7 @@ namespace TechXpress.Services.Services
 
         public async Task<IEnumerable<ProductDTO>> GetAllProductsAsync()
         {
-            var products = await _unitOfWork.Products.GetAllAsync();
+            var products = await _unitOfWork.Products.GetAllWithCategoryAsync();
             if(products == null)
             {
                 throw new KeyNotFoundException("No products found.");
@@ -33,7 +33,7 @@ namespace TechXpress.Services.Services
 
         public async Task<ProductDTO> GetProductByIdAsync(int id)
         {
-            var product = await _unitOfWork.Products.GetByIdAsync(id);
+            var product = await _unitOfWork.Products.GetByIdWithCategoryAsync(id);
             if(product == null)
             {
                 throw new KeyNotFoundException($"Product with ID {id} not found.");
@@ -43,7 +43,7 @@ namespace TechXpress.Services.Services
 
         public async Task<IEnumerable<ProductDTO>> GetProductsByCategoryAsync(int categoryId)
         {
-            var products = await _unitOfWork.Products.GetAllAsync();
+            var products = await _unitOfWork.Products.GetAllWithCategoryAsync();
             var filteredProducts = products.Where(p => p.CategoryId == categoryId);
             return _mapper.Map<IEnumerable<ProductDTO>>(filteredProducts);
         }
@@ -61,6 +61,16 @@ namespace TechXpress.Services.Services
             if (existingProduct == null)
             {
                 throw new KeyNotFoundException($"Product with ID {productDto.Id} not found.");
+            }
+
+            // If CategoryId is provided, ensure the Category object is loaded
+            if (productDto.CategoryId > 0 && existingProduct.Category?.Id != productDto.CategoryId)
+            {
+                var category = await _unitOfWork.Categories.GetByIdAsync(productDto.CategoryId);
+                if (category != null)
+                {
+                    existingProduct.Category = category;
+                }
             }
 
             _mapper.Map(productDto, existingProduct); 
@@ -91,7 +101,7 @@ namespace TechXpress.Services.Services
 
         public async Task<IEnumerable<ProductDTO>> SearchProductsAsync(string searchTerm, int? categoryId, decimal? minPrice, decimal? maxPrice)
         {
-            var products = await _unitOfWork.Products.GetAllAsync();
+            var products = await _unitOfWork.Products.GetAllWithCategoryAsync();
             
             // Apply filters
             if (!string.IsNullOrWhiteSpace(searchTerm))

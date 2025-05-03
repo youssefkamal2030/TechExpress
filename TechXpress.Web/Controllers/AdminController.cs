@@ -30,7 +30,6 @@ namespace TechXpress.Web.Controllers
             _logger = logger;
         }
 
-        // Dashboard
         public async Task<IActionResult> Index()
         {
             try
@@ -45,13 +44,11 @@ namespace TechXpress.Web.Controllers
                 ViewBag.TotalOrders = orders?.Count() ?? 0;
                 ViewBag.TotalUsers = users?.Count() ?? 0;
                 
-                // Get recent orders
                 var recentOrders = orders?
                     .OrderByDescending(o => o.OrderDate)
                     .Take(5)
                     .ToList() ?? new List<OrderDTO>();
                 
-                // Sales data for chart (sample data for now)
                 var salesData = new Dictionary<string, decimal>();
                 var currentDate = DateTime.UtcNow;
                 for (int i = 5; i >= 0; i--)
@@ -59,7 +56,6 @@ namespace TechXpress.Web.Controllers
                     var month = currentDate.AddMonths(-i);
                     var monthName = month.ToString("MMM");
                     
-                    // Filter orders for this month
                     decimal monthlySales = orders?
                         .Where(o => o.OrderDate.Year == month.Year && o.OrderDate.Month == month.Month)
                         .Sum(o => o.TotalAmount) ?? 0;
@@ -77,7 +73,6 @@ namespace TechXpress.Web.Controllers
                 _logger.LogError(ex, "Error loading dashboard");
                 TempData["Error"] = $"Error loading dashboard: {ex.Message}";
                 
-                // Initialize with default values to prevent another exception
                 ViewBag.TotalProducts = 0;
                 ViewBag.TotalCategories = 0;
                 ViewBag.TotalOrders = 0;
@@ -89,7 +84,6 @@ namespace TechXpress.Web.Controllers
             }
         }
 
-        // Product Management
         public async Task<IActionResult> Products()
         {
             try
@@ -105,7 +99,6 @@ namespace TechXpress.Web.Controllers
             }
         }
 
-        // Create Product Form
         public async Task<IActionResult> CreateProduct()
         {
             try
@@ -123,7 +116,6 @@ namespace TechXpress.Web.Controllers
             }
         }
 
-        // Create Product Post
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateProduct(ProductDTO product)
@@ -155,7 +147,6 @@ namespace TechXpress.Web.Controllers
             return View(product);
         }
 
-        // Edit Product Form
         public async Task<IActionResult> EditProduct(int id)
         {
             try
@@ -179,7 +170,6 @@ namespace TechXpress.Web.Controllers
             }
         }
 
-        // Edit Product Post
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditProduct(ProductDTO product)
@@ -198,20 +188,12 @@ namespace TechXpress.Web.Controllers
                     ModelState.AddModelError("", ex.Message);
                 }
             }
-
-            try
+            else
             {
-                ViewBag.Categories = await _productService.GetAllCategoriesAsync() ?? new List<CategoryDTO>();
             }
-            catch
-            {
-                ViewBag.Categories = new List<CategoryDTO>();
-            }
-            
             return View(product);
         }
 
-        // Delete Product
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteProduct(int id)
@@ -229,7 +211,6 @@ namespace TechXpress.Web.Controllers
             return RedirectToAction(nameof(Products));
         }
 
-        // Categories
         public async Task<IActionResult> Categories()
         {
             try
@@ -245,7 +226,6 @@ namespace TechXpress.Web.Controllers
             }
         }
         
-        // Create Category
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateCategory(CategoryDTO category)
@@ -271,7 +251,6 @@ namespace TechXpress.Web.Controllers
             return RedirectToAction(nameof(Categories));
         }
         
-        // Edit Category
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditCategory(CategoryDTO category)
@@ -297,7 +276,6 @@ namespace TechXpress.Web.Controllers
             return RedirectToAction(nameof(Categories));
         }
         
-        // Delete Category
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteCategory(int id)
@@ -315,7 +293,6 @@ namespace TechXpress.Web.Controllers
             return RedirectToAction(nameof(Categories));
         }
 
-        // Orders
         public async Task<IActionResult> Orders()
         {
             try
@@ -331,7 +308,6 @@ namespace TechXpress.Web.Controllers
             }
         }
 
-        // Order Details
         public async Task<IActionResult> OrderDetails(int id)
         {
             try
@@ -353,7 +329,44 @@ namespace TechXpress.Web.Controllers
             }
         }
         
-        // Users
+        [HttpPost]
+        public async Task<IActionResult> UpdateOrderStatus(int orderId, string status)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(status))
+                {
+                    TempData["Error"] = "Order status cannot be empty";
+                    return RedirectToAction(nameof(Orders));
+                }
+                
+                // Parse string to enum
+                if (!Enum.TryParse<OrderStatus>(status, out var orderStatus))
+                {
+                    TempData["Error"] = $"Invalid order status: {status}";
+                    return RedirectToAction(nameof(Orders));
+                }
+                
+                var success = await _orderService.UpdateOrderStatusAsync(orderId, orderStatus);
+                
+                if (success)
+                {
+                    TempData["Success"] = $"Order #{orderId} status updated to {status}";
+                }
+                else
+                {
+                    TempData["Error"] = $"Failed to update order #{orderId} status";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating order status");
+                TempData["Error"] = $"Error updating order status: {ex.Message}";
+            }
+            
+            return RedirectToAction(nameof(Orders));
+        }
+        
         public async Task<IActionResult> Users()
         {
             try
@@ -367,6 +380,40 @@ namespace TechXpress.Web.Controllers
                 TempData["Error"] = $"Error loading users: {ex.Message}";
                 return View(new List<UserDTO>());
             }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateUserRoles(string userId, List<string> roles)
+        {
+            try
+            {
+                await _authService.UpdateUserRolesAsync(userId, roles);
+                TempData["Success"] = "User roles updated successfully!";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating user roles");
+                TempData["Error"] = ex.Message;
+            }
+            return RedirectToAction(nameof(Users));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteUser(string userId)
+        {
+            try
+            {
+                await _authService.DeleteUserAsync(userId);
+                TempData["Success"] = "User deleted successfully!";
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting user");
+                TempData["Error"] = ex.Message;
+            }
+            return RedirectToAction(nameof(Users));
         }
     }
 } 

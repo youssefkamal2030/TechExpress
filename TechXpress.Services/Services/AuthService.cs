@@ -105,5 +105,67 @@ namespace TechXpress.Services.Services
 
             return true;
         }
+
+        public async Task<bool> UpdateUserRolesAsync(string userId, List<string> roles)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                throw new Exception("User not found");
+            }
+
+            // Get current roles
+            var currentRoles = await _userManager.GetRolesAsync(user);
+            
+            // Remove user from all current roles
+            var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+            if (!removeResult.Succeeded)
+            {
+                var errorMessage = string.Join(", ", removeResult.Errors.Select(e => e.Description));
+                throw new Exception($"Failed to remove current roles: {errorMessage}");
+            }
+
+            // Add user to new roles
+            if (roles != null && roles.Any())
+            {
+                var addResult = await _userManager.AddToRolesAsync(user, roles);
+                if (!addResult.Succeeded)
+                {
+                    var errorMessage = string.Join(", ", addResult.Errors.Select(e => e.Description));
+                    throw new Exception($"Failed to add new roles: {errorMessage}");
+                }
+            }
+
+            return true;
+        }
+
+        public async Task<bool> DeleteUserAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                throw new Exception("User not found");
+            }
+
+            // Check if this is the last admin
+            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            if (isAdmin)
+            {
+                var adminUsers = await _userManager.GetUsersInRoleAsync("Admin");
+                if (adminUsers.Count <= 1)
+                {
+                    throw new Exception("Cannot delete the last admin user");
+                }
+            }
+
+            var result = await _userManager.DeleteAsync(user);
+            if (!result.Succeeded)
+            {
+                var errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new Exception($"Failed to delete user: {errorMessage}");
+            }
+
+            return true;
+        }
     }
 }

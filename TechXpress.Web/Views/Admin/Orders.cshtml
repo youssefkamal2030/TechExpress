@@ -29,22 +29,23 @@
                             <td>@order.OrderItems.Count()</td>
                             <td>$@order.TotalAmount.ToString("F2")</td>
                             <td>
-                                @if (order.Status.ToString() == "Completed")
-                                {
-                                    <span class="badge bg-success">@order.Status</span>
-                                }
-                                else if (order.Status.ToString() == "Processing")
-                                {
-                                    <span class="badge bg-primary">@order.Status</span>
-                                }
-                                else if (order.Status.ToString() == "Cancelled")
-                                {
-                                    <span class="badge bg-danger">@order.Status</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary">@order.Status</span>
-                                }
+                                <form asp-action="UpdateOrderStatus" asp-controller="Admin" method="post" class="status-form">
+                                    <input type="hidden" name="orderId" value="@order.Id" />
+                                    <div class="d-flex align-items-center">
+                                        <span class="badge status-badge me-2 bg-success">@order.Status</span>
+                                        <select name="status" class="form-select form-select-sm status-select" aria-label="Order status" onchange="toggleUpdateButton(this)">
+                                            <option value="Pending" selected="@(order.Status.ToString() == "Pending")">Pending</option>
+                                            <option value="Processing" selected="@(order.Status.ToString() == "Processing")">Processing</option>
+                                            <option value="Shipped" selected="@(order.Status.ToString() == "Shipped")">Shipped</option>
+                                            <option value="Delivered" selected="@(order.Status.ToString() == "Delivered")">Delivered</option>
+                                            <option value="Completed" selected="@(order.Status.ToString() == "Completed")">Completed</option>
+                                            <option value="Cancelled" selected="@(order.Status.ToString() == "Cancelled")">Cancelled</option>
+                                        </select>
+                                        <button type="submit" class="btn btn-sm btn-outline-primary ms-2 update-status-btn" style="display: none;">
+                                            <i class="bi bi-check"></i>
+                                        </button>
+                                    </div>
+                                </form>
                             </td>
                             <td>
                                 <a href="@Url.Action("OrderDetails", "Admin", new { id = order.Id })" class="btn btn-sm btn-primary">
@@ -59,6 +60,52 @@
     </div>
 </div>
 
+
+
 @section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#ordersTable').DataTable();
+            
+            // Add confirmation before status update
+            $('.status-form').on('submit', function(e) {
+                e.preventDefault();
+                var form = $(this);
+                var currentStatus = form.find('.status-select option:selected').text();
+                
+                if (confirm('Are you sure you want to change the order status to "' + currentStatus + '"?')) {
+                    form.off('submit').submit();
+                }
+            });
+        });
+        
+        // Toggle update button visibility based on selection change
+        function toggleUpdateButton(selectElement) {
+            const form = selectElement.closest('form');
+            const currentStatus = form.querySelector('.status-badge').textContent.trim();
+            const selectedStatus = selectElement.options[selectElement.selectedIndex].text;
+            const updateButton = form.querySelector('.update-status-btn');
+            
+            if (currentStatus !== selectedStatus) {
+                updateButton.style.display = 'block';
+            } else {
+                updateButton.style.display = 'none';
+            }
+        }
+    </script>
     
+    <style>
+        .status-select {
+            min-width: 120px;
+        }
+        
+        .update-status-btn {
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .status-badge {
+            min-width: 90px;
+            text-align: center;
+        }
+    </style>
 } 

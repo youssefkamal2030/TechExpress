@@ -51,19 +51,24 @@ namespace TechXpress.Models.Mappings
             if (string.IsNullOrEmpty(status))
                 return OrderStatus.Pending;
 
+            // Try to parse the status string directly to enum
+            if (Enum.TryParse<OrderStatus>(status, true, out var orderStatus))
+                return orderStatus;
+
+            // Legacy mapping for old status values
             if (status.Equals("paid", StringComparison.OrdinalIgnoreCase))
                 return OrderStatus.Processing;
-            else
+            else if (status.Equals("not paid", StringComparison.OrdinalIgnoreCase))
                 return OrderStatus.Pending;
+            
+            // Default
+            return OrderStatus.Pending;
         }
 
         private string MapOrderStatusToString(OrderStatus status)
         {
-            if (status == OrderStatus.Processing || status == OrderStatus.Shipped || 
-                status == OrderStatus.Delivered)
-                return "paid";
-            else
-                return "not paid";
+            // Store the enum value name directly as a string
+            return status.ToString();
         }
     }
 }
