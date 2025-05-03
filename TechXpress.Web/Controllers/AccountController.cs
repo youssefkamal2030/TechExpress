@@ -29,17 +29,17 @@ namespace TechXpress.Web.Controllers
         {
             try
             {
-                // First verify credentials
                 var user = new User { Email = email, password = password };
                 var token = await _authService.LoginUserAsync(user);
 
-                // Get the actual user from database
                 var dbUser = await _userManager.FindByEmailAsync(email);
                 if (dbUser == null)
                 {
                     ViewBag.Error = "Invalid login attempt.";
                     return View();
                 }
+
+                var roles = await _userManager.GetRolesAsync(dbUser);
 
                 var claims = new List<Claim>
                 {
@@ -48,8 +48,20 @@ namespace TechXpress.Web.Controllers
                     new Claim("Token", token)
                 };
 
+                foreach (var role in roles)
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, role));
+                }
+
                 var identity = new ClaimsIdentity(claims, "CookieAuth");
-                await HttpContext.SignInAsync("CookieAuth", new ClaimsPrincipal(identity));
+                var principal = new ClaimsPrincipal(identity);
+
+                await HttpContext.SignInAsync("CookieAuth", principal, new AuthenticationProperties
+                {
+                    IsPersistent = true,
+                    ExpiresUtc = DateTime.UtcNow.AddHours(1)
+                });
+
                 return RedirectToAction("Index", "Home");
             }
             catch (Exception ex)
@@ -81,6 +93,8 @@ namespace TechXpress.Web.Controllers
                     var result = await _userManager.CreateAsync(user, user.password);
                     if (result.Succeeded)
                     {
+                        // Assign Customer role by default
+                        await _userManager.AddToRoleAsync(user, "Customer");
                         return RedirectToAction("Login");
                     }
                     

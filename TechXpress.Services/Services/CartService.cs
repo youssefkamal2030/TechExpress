@@ -10,7 +10,7 @@ namespace TechXpress.Services.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        public CartService(IUnitOfWork unitOfWork , IMapper mapper)
+        public CartService(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -23,26 +23,29 @@ namespace TechXpress.Services.Services
                 throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
             }
 
-            var product = await _unitOfWork.Products.GetByIdAsync(productId);
-            if (product == null)
+            var result = await _unitOfWork.ShoppingCarts.AddItemToCartAsync(userId, productId, quantity);
+            if (!result)
             {
-                throw new ArgumentException("Product not found.", nameof(productId));
+                throw new InvalidOperationException("Failed to add item to cart.");
             }
-
-           
-            await _unitOfWork.ShoppingCarts.AddItemToCartAsync(userId, productId, quantity);
         }
 
         public async Task RemoveFromCartAsync(int productId, string userId)
         {
-          
-            await _unitOfWork.ShoppingCarts.RemoveItemFromCartAsync(userId, productId);
+            var result = await _unitOfWork.ShoppingCarts.RemoveItemFromCartAsync(userId, productId);
+            if (!result)
+            {
+                throw new InvalidOperationException("Failed to remove item from cart.");
+            }
         }
 
         public async Task ClearCartAsync(string userId)
         {
-            
-            await _unitOfWork.ShoppingCarts.ClearCartAsync(userId);
+            var result = await _unitOfWork.ShoppingCarts.ClearCartAsync(userId);
+            if (!result)
+            {
+                throw new InvalidOperationException("Failed to clear cart.");
+            }
         }
 
         public async Task<int> GetCartCountAsync(string userId)
@@ -66,20 +69,26 @@ namespace TechXpress.Services.Services
             decimal total = 0;
             foreach (var item in cart.Items)
             {
-                var product = await _unitOfWork.Products.GetByIdAsync(item.ProductId);
-                if (product != null)
+                if (item.PriceAtAdd.HasValue)
                 {
-                    total += product.Price * item.Quantity;
+                    total += item.PriceAtAdd.Value * item.Quantity;
+                }
+                else
+                {
+                    var product = await _unitOfWork.Products.GetByIdAsync(item.ProductId);
+                    if (product != null)
+                    {
+                        total += product.Price * item.Quantity;
+                    }
                 }
             }
             return total;
-
         }
+
         public async Task<ShoppingCartDTO> GetCartByUserIdAsync(string userId)
         {
             var cart = await _unitOfWork.ShoppingCarts.GetCartByUserIdAsync(userId);
             return _mapper.Map<ShoppingCartDTO>(cart);
         }
-
     }
 }

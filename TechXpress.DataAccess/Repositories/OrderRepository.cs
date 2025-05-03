@@ -1,60 +1,45 @@
-﻿using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using TechXpress.DataAccess.Data;
 using TechXpress.DataAccess.Interfaces;
 using TechXpress.Models.entitis;
 
 namespace TechXpress.DataAccess.Repositories
 {
-    public class OrderRepository : IOrderRepository
+    public class OrderRepository : Repository<Order>, IOrderRepository
     {
         private readonly TechXpressDbContext _context;
 
-        public OrderRepository(TechXpressDbContext context)
+        public OrderRepository(TechXpressDbContext context) : base(context)
         {
             _context = context;
         }
 
-        public async Task<Order> GetByIdAsync(int id)
+        public async Task<IEnumerable<Order>> GetAllWithUserAndItemsAsync()
         {
             return await _context.Orders
+                .Include(o => o.User)
                 .Include(o => o.OrderItems)
-                .FirstOrDefaultAsync(o => o.Id == id);
-        }
-
-        public async Task<IEnumerable<Order>> GetAllAsync()
-        {
-            return await _context.Orders
-                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
                 .ToListAsync();
         }
 
-        public async Task AddAsync(Order order)
+        public async Task<Order> GetByIdWithItemsAsync(int id)
         {
-            if (order.OrderItems != null && order.OrderItems.Any())
-            {
-                foreach (var item in order.OrderItems)
-                {
-                    if (item.OrderId == 0)
-                    {
-                        item.OrderId = order.Id;
-                    }
-                }
-            }
-            await _context.Orders.AddAsync(order);
+            return await _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .FirstOrDefaultAsync(o => o.Id == id);
         }
 
-        public async Task UpdateAsync(Order order)
+        public new async Task<IEnumerable<Order>> FindAsync(Expression<Func<Order, bool>> predicate)
         {
-            _context.Orders.Update(order);
-        }
-
-        public async Task DeleteAsync(int id)
-        {
-            var order = await GetByIdAsync(id);
-            if (order != null)
-            {
-                _context.Orders.Remove(order);
-            }
+            return await _context.Orders.Where(predicate).ToListAsync();
         }
     }
-}
+} 

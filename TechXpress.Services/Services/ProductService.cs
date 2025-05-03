@@ -117,5 +117,61 @@ namespace TechXpress.Services.Services
 
             return _mapper.Map<IEnumerable<ProductDTO>>(products);
         }
+
+        public async Task<IEnumerable<ProductDTO>> GetProductsByCategoryIdAsync(int categoryId)
+        {
+            var products = await _unitOfWork.Products.FindAsync(p => p.CategoryId == categoryId);
+            return _mapper.Map<IEnumerable<ProductDTO>>(products);
+        }
+
+        // Category methods
+        public async Task<CategoryDTO> GetCategoryByIdAsync(int id)
+        {
+            var category = await _unitOfWork.Categories.GetByIdAsync(id);
+            if (category == null)
+            {
+                throw new KeyNotFoundException($"Category with ID {id} not found.");
+            }
+            return _mapper.Map<CategoryDTO>(category);
+        }
+
+        public async Task AddCategoryAsync(CategoryDTO categoryDto)
+        {
+            var category = _mapper.Map<Category>(categoryDto);
+            await _unitOfWork.Categories.AddAsync(category);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task UpdateCategoryAsync(CategoryDTO categoryDto)
+        {
+            var existingCategory = await _unitOfWork.Categories.GetByIdAsync(categoryDto.Id);
+            if (existingCategory == null)
+            {
+                throw new KeyNotFoundException($"Category with ID {categoryDto.Id} not found.");
+            }
+
+            _mapper.Map(categoryDto, existingCategory);
+            await _unitOfWork.Categories.UpdateAsync(existingCategory);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task DeleteCategoryAsync(int id)
+        {
+            var category = await _unitOfWork.Categories.GetByIdAsync(id);
+            if (category == null)
+            {
+                throw new KeyNotFoundException($"Category with ID {id} not found.");
+            }
+
+            // Check if any products are using this category
+            var productsInCategory = await _unitOfWork.Products.FindAsync(p => p.CategoryId == id);
+            if (productsInCategory.Any())
+            {
+                throw new InvalidOperationException("Cannot delete category because it contains products. Remove or reassign the products first.");
+            }
+
+            await _unitOfWork.Categories.DeleteAsync(id);
+            await _unitOfWork.SaveChangesAsync();
+        }
     }
 }

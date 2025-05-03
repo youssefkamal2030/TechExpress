@@ -1,4 +1,8 @@
 ﻿using AutoMapper;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using TechXpress.DataAccess.Interfaces;
 using TechXpress.Models.Dto_s;
 using TechXpress.Models.entitis;
@@ -19,13 +23,16 @@ namespace TechXpress.Services.Services
             _mapper = mapper;
         }
 
-        public async Task<bool> CreateOrderAsync(Order order)
+        public async Task<bool> CreateOrderAsync(OrderDTO orderDto)
         {
             try
             {
-                if (order == null)
-                    throw new ArgumentNullException(nameof(order));
+                if (orderDto == null)
+                    throw new ArgumentNullException(nameof(orderDto));
 
+                var order = _mapper.Map<Order>(orderDto);
+                // Set hard-coded status
+                order.Status = "not paid";
                 await _unitOfWork.Orders.AddAsync(order);
                 await _unitOfWork.SaveChangesAsync();
                 return true;
@@ -37,19 +44,21 @@ namespace TechXpress.Services.Services
             }
         }
 
-        public async Task<bool> UpdateOrderAsync(Order order)
+        public async Task<bool> UpdateOrderAsync(OrderDTO orderDto)
         {
             try
             {
-                if (order == null)
-                    throw new ArgumentNullException(nameof(order));
+                if (orderDto == null)
+                    throw new ArgumentNullException(nameof(orderDto));
 
-                var existingOrder = await _unitOfWork.Orders.GetByIdAsync(order.Id);
+                var existingOrder = await _unitOfWork.Orders.GetByIdAsync(orderDto.Id);
                 if (existingOrder == null)
-                    throw new KeyNotFoundException($"Order with ID {order.Id} not found");
+                    throw new KeyNotFoundException($"Order with ID {orderDto.Id} not found");
 
-                _mapper.Map(order, existingOrder);
-                await _unitOfWork.Orders.UpdateAsync(existingOrder);
+                var order = _mapper.Map<Order>(orderDto);
+                // Preserve the existing status or set to "not paid" if null
+                order.Status = existingOrder.Status ?? "not paid";
+                await _unitOfWork.Orders.UpdateAsync(order);
                 await _unitOfWork.SaveChangesAsync();
                 return true;
             }
@@ -79,15 +88,15 @@ namespace TechXpress.Services.Services
             }
         }
 
-        public async Task<Order> GetOrderByIdAsync(int id)
+        public async Task<OrderDTO> GetOrderByIdAsync(int id)
         {
             try
             {
-                var order = await _unitOfWork.Orders.GetByIdAsync(id);
+                var order = await _unitOfWork.Orders.GetByIdWithItemsAsync(id);
                 if (order == null)
                     throw new KeyNotFoundException($"Order with ID {id} not found");
 
-                return order;
+                return _mapper.Map<OrderDTO>(order);
             }
             catch (Exception ex)
             {
@@ -96,39 +105,45 @@ namespace TechXpress.Services.Services
             }
         }
 
-        public async Task<IEnumerable<Order>> GetAllOrdersAsync()
+        public async Task<IEnumerable<OrderDTO>> GetAllOrdersAsync()
         {
             try
             {
-                var orders = await _unitOfWork.Orders.GetAllAsync();
+                var orders = await _unitOfWork.Orders.GetAllWithUserAndItemsAsync();
                 if (orders == null || !orders.Any())
                     throw new KeyNotFoundException("No orders found");
 
-                return orders;
+                return _mapper.Map<IEnumerable<OrderDTO>>(orders);
             }
             catch (Exception ex)
             {
-                // Log the error
                 throw;
             }
         }
 
-        public async Task<Order> PlaceOrderAsync(string userId, List<CartItem> cartItems, string paymentToken)
+        public async Task<OrderDTO> PlaceOrderAsync(string userId, List<CartItemDTO> cartItemDtos, string paymentToken)
         {
             if (string.IsNullOrEmpty(userId))
                 throw new ArgumentNullException(nameof(userId), "User ID cannot be null or empty");
-            if (cartItems == null || !cartItems.Any())
-                throw new ArgumentException("Cart items cannot be empty", nameof(cartItems));
+            if (cartItemDtos == null || !cartItemDtos.Any())
+                throw new ArgumentException("Cart items cannot be empty", nameof(cartItemDtos));
             
+            var cartItems = _mapper.Map<List<CartItem>>(cartItemDtos);
             decimal total = cartItems.Sum(item => (decimal)item.PriceAtAdd * item.Quantity);
             if (total <= 0)
                 throw new InvalidOperationException("Total amount must be greater than zero");
             
+            // Get the user to retrieve their email
+            var user = await _unitOfWork.GetContext().Users.FindAsync(userId);
+            if (user == null)
+                throw new KeyNotFoundException($"User with ID {userId} not found");
+
             var order = new Order
             {
                 UserId = userId,
                 OrderDate = DateTime.UtcNow,
-                Status = "Pending",
+                Status = "not paid",
+                StatusUpdatedAt = DateTime.UtcNow,
                 TotalAmount = total,
                 OrderItems = cartItems.Select(item => new OrderItem
                 {
@@ -140,7 +155,7 @@ namespace TechXpress.Services.Services
 
             try
             {
-                using (var transaction = _unitOfWork._context.Database.BeginTransaction())
+                using (var transaction = _unitOfWork.GetContext().Database.BeginTransaction())
                 {
                     try
                     {
@@ -154,7 +169,7 @@ namespace TechXpress.Services.Services
                         
                         if (paymentSuccess)
                         {
-                            order.Status = "Paid";
+                            order.Status = "paid";
                             
                             // Update product stock
                             foreach (var item in order.OrderItems)
@@ -173,48 +188,31 @@ namespace TechXpress.Services.Services
                             // Save the order
                             await _unitOfWork.Orders.AddAsync(order);
                             await _unitOfWork.SaveChangesAsync();
-
-                            // Clear the cart
-                            var cart = await _unitOfWork.ShoppingCarts.GetCartByUserIdAsync(userId);
-                            if (cart != null)
-                            {
-                                cart.Items.Clear();
-                                await _unitOfWork.ShoppingCarts.UpdateAsync(cart);
-                                await _unitOfWork.SaveChangesAsync();
-                            }
                             
-                            await transaction.CommitAsync();
+                            // Commit transaction
+                            transaction.Commit();
+                            
+                            // Map to DTO and add the user email
+                            var orderDTO = _mapper.Map<OrderDTO>(order);
+                            orderDTO.UserEmail = user.Email;
+                            return orderDTO;
                         }
                         else
                         {
-                            order.Status = "Payment Failed";
-                            await _unitOfWork.Orders.AddAsync(order);
-                            await _unitOfWork.SaveChangesAsync();
+                            // Payment failed
+                            throw new InvalidOperationException("Payment failed");
                         }
-
-                        return order;
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        await transaction.RollbackAsync();
+                        // Rollback transaction
+                        transaction.Rollback();
                         throw;
                     }
                 }
             }
             catch (Exception ex)
             {
-                // Save the order in error state for auditing
-                order.Status = "Error";
-                try
-                {
-                    await _unitOfWork.Orders.AddAsync(order);
-                    await _unitOfWork.SaveChangesAsync();
-                }
-                catch 
-                {
-                    throw new Exception("Error while saving the order");
-                }
-                
                 throw new InvalidOperationException($"Failed to process order: {ex.Message}", ex);
             }
         }
@@ -240,6 +238,102 @@ namespace TechXpress.Services.Services
                 Console.WriteLine($"Error in GetOrdersByUserIdAsync: {ex.Message}");
                 throw;
             }
+        }
+
+        public async Task<bool> UpdateOrderStatusAsync(int orderId, string status)
+        {
+            try
+            {
+                var order = await _unitOfWork.Orders.GetByIdAsync(orderId);
+                if (order == null)
+                    throw new KeyNotFoundException($"Order with ID {orderId} not found");
+
+                // Set hard-coded status based on string value
+                if (status.Equals("Processing", StringComparison.OrdinalIgnoreCase) || 
+                    status.Equals("Shipped", StringComparison.OrdinalIgnoreCase) || 
+                    status.Equals("Delivered", StringComparison.OrdinalIgnoreCase))
+                {
+                    order.Status = "paid";
+                }
+                else
+                {
+                    order.Status = "not paid";
+                }
+                
+                order.StatusUpdatedAt = DateTime.UtcNow;
+                await _unitOfWork.Orders.UpdateAsync(order);
+                await _unitOfWork.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Log the error
+                return false;
+            }
+        }
+
+        public async Task<IEnumerable<OrderDTO>> GetOrdersByDateRangeAsync(DateTime startDate, DateTime endDate)
+        {
+            try
+            {
+                var orders = await _unitOfWork.Orders.GetAllWithUserAndItemsAsync();
+                var filteredOrders = orders.Where(o => o.OrderDate >= startDate && o.OrderDate <= endDate.AddDays(1).AddTicks(-1));
+                
+                if (!filteredOrders.Any())
+                    return new List<OrderDTO>();
+
+                return _mapper.Map<IEnumerable<OrderDTO>>(filteredOrders);
+            }
+            catch (Exception ex)
+            {
+                // Log the error
+                throw;
+            }
+        }
+        
+        public async Task<IEnumerable<OrderDTO>> GetOrdersByStatusAsync(string status)
+        {
+            try
+            {
+                var orders = await _unitOfWork.Orders.GetAllWithUserAndItemsAsync();
+                // Replace status filtering with "paid" or "not paid"
+                string statusFilter;
+                
+                if (status.Equals("Processing", StringComparison.OrdinalIgnoreCase) || 
+                    status.Equals("Shipped", StringComparison.OrdinalIgnoreCase) || 
+                    status.Equals("Delivered", StringComparison.OrdinalIgnoreCase))
+                {
+                    statusFilter = "paid";
+                }
+                else
+                {
+                    statusFilter = "not paid";
+                }
+                
+                var filteredOrders = orders.Where(o => o.Status.Equals(statusFilter, StringComparison.OrdinalIgnoreCase));
+                
+                if (!filteredOrders.Any())
+                    return new List<OrderDTO>();
+
+                return _mapper.Map<IEnumerable<OrderDTO>>(filteredOrders);
+            }
+            catch (Exception ex)
+            {
+                // Log the error
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateOrderStatusAsync(int orderId, OrderStatus status)
+        {
+            string statusString = status.ToString();
+            return await UpdateOrderStatusAsync(orderId, statusString);
+        }
+
+        public async Task<IEnumerable<OrderDTO>> GetOrdersByStatusAsync(OrderStatus status)
+        {
+            string statusString = status.ToString();
+            return await GetOrdersByStatusAsync(statusString);
         }
     }
 }

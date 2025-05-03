@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TechXpress.Services.Services;
+using Microsoft.DotNet.Scaffolding.Shared.Messaging;
 using TechXpress.Models.Dto_s;
-using TechXpress.Models.entitis;
 using TechXpress.Services.Interfaces;
+
 namespace TechXpress.Web.Controllers
 {
     public class ProductController : Controller
@@ -66,9 +66,9 @@ namespace TechXpress.Web.Controllers
             {
                 return NotFound();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return View("Error", "An error occurred while retrieving the product details.");
+                return View("Error", ex.Message);
             }
         }
 

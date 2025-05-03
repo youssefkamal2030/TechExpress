@@ -1,46 +1,37 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using TechXpress.DataAccess.Data;
 using TechXpress.DataAccess.Interfaces;
 using TechXpress.Models.entitis;
-using TechXpress.DataAccess.Data;
 
 namespace TechXpress.DataAccess.Repositories
 {
-    public class ProductRepository : IProductRepository
+    public class ProductRepository : Repository<Product>, IProductRepository
     {
         private readonly TechXpressDbContext _context;
 
-        public ProductRepository(TechXpressDbContext context) 
+        public ProductRepository(TechXpressDbContext context) : base(context)
         {
             _context = context;
         }
 
-        public async Task<Product> GetByIdAsync(int id)
+        public async Task<IEnumerable<Product>> GetAllWithCategoryAsync()
         {
-            return await _context.Products.FindAsync(id);
+            return await _context.Products.Include(p => p.Category).ToListAsync();
         }
 
-        public async Task<IEnumerable<Product>> GetAllAsync()
+        public async Task<Product> GetByIdWithCategoryAsync(int id)
         {
-            return await _context.Products.ToListAsync();
+            return await _context.Products.Include(p => p.Category).FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task AddAsync(Product product)
+        public new async Task<IEnumerable<Product>> FindAsync(Expression<Func<Product, bool>> predicate)
         {
-            await _context.Products.AddAsync(product);
-        }
-
-        public async Task UpdateAsync(Product product)
-        {
-            _context.Products.Update(product);
-        }
-
-        public async Task DeleteAsync(int id)
-        {
-            var product = await GetByIdAsync(id);
-            if (product != null)
-            {
-                _context.Products.Remove(product);
-            }
+            return await _context.Products.Where(predicate).ToListAsync();
         }
     }
 }

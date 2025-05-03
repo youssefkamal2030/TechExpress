@@ -13,10 +13,15 @@ namespace TechXpress.Services.Interfaces
             Task<IEnumerable<ProductDTO>> GetAllProductsAsync();
             Task<ProductDTO> GetProductByIdAsync(int id);
             Task<IEnumerable<ProductDTO>> GetProductsByCategoryAsync(int categoryId);
+            Task<IEnumerable<ProductDTO>> GetProductsByCategoryIdAsync(int categoryId);
             Task AddProductAsync(ProductDTO productDto); 
             Task UpdateProductAsync(ProductDTO productDto); 
             Task DeleteProductAsync(int id);
         Task<IEnumerable<CategoryDTO>> GetAllCategoriesAsync();
         Task<IEnumerable<ProductDTO>> SearchProductsAsync(string searchTerm, int? categoryId, decimal? minPrice, decimal? maxPrice);
+        Task<CategoryDTO> GetCategoryByIdAsync(int id);
+        Task AddCategoryAsync(CategoryDTO categoryDto);
+        Task UpdateCategoryAsync(CategoryDTO categoryDto);
+        Task DeleteCategoryAsync(int id);
     }
 }

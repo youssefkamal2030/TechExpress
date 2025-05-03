@@ -1,4 +1,5 @@
-﻿using TechXpress.DataAccess.Interfaces;
+﻿using System.Threading.Tasks;
+using TechXpress.DataAccess.Interfaces;
 using TechXpress.DataAccess.Repositories;
 using TechXpress.Models.entitis;
 
@@ -6,7 +7,7 @@ namespace TechXpress.DataAccess.Data
 {
     public class UnitOfWork : IUnitOfWork
     {
-        public TechXpressDbContext _context { get; private set; }
+        private readonly TechXpressDbContext _context;
         public IOrderRepository Orders { get; private set; }
         public IProductRepository Products { get; private set; }
         public ICategoryRepository Categories { get; private set; }
@@ -21,6 +22,10 @@ namespace TechXpress.DataAccess.Data
             ShoppingCarts = new ShoppingCartRepository(_context);
         }
 
+        public TechXpressDbContext GetContext()
+        {
+            return _context;
+        }
        
         public async Task<int> SaveChangesAsync()
         {

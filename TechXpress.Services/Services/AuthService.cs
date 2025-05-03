@@ -1,8 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using TechXpress.DataAccess.Interfaces;
+using TechXpress.Models.Dto_s;
 using TechXpress.Models.entitis;
 using TechXpress.Services.Interfaces;
 
@@ -13,12 +17,34 @@ namespace TechXpress.Services.Services
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly ITokenService _jwtTokenService;
+        private readonly IMapper _mapper;
 
-        public AuthService(UserManager<User> userManager, SignInManager<User> signInManager,ITokenService tokenService)
+        public AuthService(
+            UserManager<User> userManager, 
+            SignInManager<User> signInManager,
+            ITokenService tokenService,
+            IMapper mapper)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _jwtTokenService = tokenService;
+            _mapper = mapper;
+        }
+
+        public async Task<IEnumerable<UserDTO>> GetAllUsersAsync()
+        {
+            var users = await _userManager.Users.ToListAsync();
+            var userDtos = new List<UserDTO>();
+            
+            foreach (var user in users)
+            {
+                var roles = await _userManager.GetRolesAsync(user);
+                var userDto = _mapper.Map<UserDTO>(user);
+                userDto.Roles = roles.ToList();
+                userDtos.Add(userDto);
+            }
+            
+            return userDtos;
         }
 
         public async Task<string> LoginUserAsync(User user)

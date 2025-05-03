@@ -1,0 +1,80 @@
+@model IEnumerable<TechXpress.Models.Dto_s.ProductDTO>
+@{
+    ViewData["Title"] = "Product Management";
+    Layout = "_AdminLayout";
+    ViewData["HeaderButton"] = "<a asp-controller='Admin' asp-action='CreateProduct' class='btn btn-primary'><i class='bi bi-plus'></i> Add New Product</a>";
+}
+
+<div class="card shadow mb-4">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered datatable" id="productsTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Available</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var product in Model)
+                    {
+                        <tr>
+                            <td>@product.Id</td>
+                            <td>
+                                @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                {
+                                    <img src="@product.ImageUrl" alt="@product.Name" class="product-thumbnail" />
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No image</span>
+                                }
+                            </td>
+                            <td>@product.Name</td>
+                            <td>@product.CategoryName</td>
+                            <td>$@product.Price.ToString("F2")</td>
+                            <td>@product.Stock</td>
+                            <td>
+                                @if (product.IsAvailable)
+                                {
+                                    <span class="badge bg-success">Yes</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">No</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a asp-controller="Admin" asp-action="EditProduct" asp-route-id="@product.Id" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form asp-controller="Admin" asp-action="DeleteProduct" asp-route-id="@product.Id" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-danger delete-confirm">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('#productsTable').DataTable();
+        });
+    </script>
+} 

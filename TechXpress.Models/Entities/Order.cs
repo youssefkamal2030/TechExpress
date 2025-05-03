@@ -1,5 +1,4 @@
-﻿
-namespace TechXpress.Models.entitis
+﻿namespace TechXpress.Models.entitis
 {
     public class Order
     {
@@ -7,6 +6,7 @@ namespace TechXpress.Models.entitis
         public string UserId { get; set; }
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
         public string? Status { get; set; }
+        public DateTime? StatusUpdatedAt { get; set; }
         public decimal TotalAmount { get; set; }
         public virtual User User { get; set; }
         public virtual ICollection<OrderItem> OrderItems { get; set; }

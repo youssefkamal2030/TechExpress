@@ -42,7 +42,7 @@
                                             <td># @order.Id</td>
                                             <td>@order.OrderDate.ToString("MMM dd, yyyy")</td>
                                             <td>
-                                                @switch (order.Status)
+                                                @switch (order.Status.ToString())
                                                 {
                                                     case "Paid":
                                                         <span class="badge bg-success">@order.Status</span>

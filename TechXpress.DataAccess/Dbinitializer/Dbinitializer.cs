@@ -35,13 +35,14 @@ namespace TechXpress.DataAccess.Dbinitializer
             }
             catch (Exception ex)
             {
-                // Log the exception
+                
             }
 
             if (!await _roleManager.RoleExistsAsync("Customer"))
             {
                 await _roleManager.CreateAsync(new IdentityRole("Customer"));
                 await _roleManager.CreateAsync(new IdentityRole("Admin"));
+                await _roleManager.CreateAsync(new IdentityRole("Seller"));
 
                 var adminUser = new User
                 {

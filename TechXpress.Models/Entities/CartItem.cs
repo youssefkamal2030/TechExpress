@@ -8,9 +8,8 @@ namespace TechXpress.Models.entitis
         [Key]
         public int Id { get; set; }
 
-        
-        public int CartId { get; set; }
-        [ForeignKey(nameof(CartId))]
+        public int ShoppingCartId { get; set; }
+        [ForeignKey(nameof(ShoppingCartId))]
         public ShoppingCart Cart { get; set; }
 
         public int ProductId { get; set; }
@@ -19,7 +18,6 @@ namespace TechXpress.Models.entitis
         public string? ImageUrl { get; set; }
         public int Quantity { get; set; }
 
-       
         public decimal? PriceAtAdd { get; set; }
     }
 }

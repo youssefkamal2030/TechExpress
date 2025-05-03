@@ -7,13 +7,14 @@ using TechXpress.DataAccess.Data;
 using TechXpress.Models.entitis;
 using TechXpress.Services;
 using TechXpress.DataAccess.Repositories;
-using TechXpress.Services.Services;
 using TechXpress.Services.Interfaces;
 using TechXpress.Models.Mappings;
 using Stripe;
 using TechXpress.Models.Configuration;
 using AutoMapper;
-using Microsoft.Data.SqlClient;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace TechXpress
 {
@@ -45,6 +46,9 @@ namespace TechXpress
             .AddEntityFrameworkStores<TechXpressDbContext>()
             .AddDefaultTokenProviders();
 
+            // RoleManager
+            builder.Services.AddScoped<RoleManager<IdentityRole>>();
+
             builder.Services.ConfigureApplicationCookie(options =>
             {
                 options.LoginPath = "/Account/SignIn";
@@ -52,11 +56,35 @@ namespace TechXpress
             });
 
             builder.Services.AddAutoMapper(typeof(MappingProfile));
-            builder.Services.AddAuthentication("CookieAuth")
-                .AddCookie("CookieAuth", options =>
+
+            //  Authentication
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = "CookieAuth";  // Cookie Auth for web interface
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;  // Default for API
+            })
+            .AddCookie("CookieAuth", options =>
+            {
+                options.LoginPath = "/Account/Login";
+                options.AccessDeniedPath = "/Account/AccessDenied";
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+                options.SlidingExpiration = true;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    options.LoginPath = "/Account/Login";
-                });
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"])),
+                    ValidateIssuer = true,
+                    ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                    ValidateAudience = true,
+                    ValidAudience = builder.Configuration["Jwt:Audience"],
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero
+                };
+            });
 
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
@@ -65,7 +93,6 @@ namespace TechXpress
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
-            builder.Services.AddMemoryCache();
 
             // Repository and Services Registration 
             builder.Services.AddScoped<IDbinitializer, Dbinitializer>();
@@ -78,7 +105,7 @@ namespace TechXpress
             builder.Services.AddScoped<IShoppingCartService, CartService>();
             builder.Services.AddScoped<IOrderService, TechXpress.Services.Services.OrderService>();
 
-            // Configure Stripe Settings
+            //  Stripe Settings
             var stripeSettings = builder.Configuration.GetSection("Stripe").Get<StripeSettings>();
             builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
             StripeConfiguration.ApiKey = stripeSettings.SecretKey;
@@ -96,7 +123,6 @@ namespace TechXpress
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
@@ -114,7 +140,6 @@ namespace TechXpress
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
-            // Run database seeding asynchronously
             _ = Task.Run(async () =>
             {
                 using (var scope = app.Services.CreateScope())

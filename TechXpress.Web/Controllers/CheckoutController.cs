@@ -2,10 +2,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
 using Stripe.Checkout;
-using TechXpress.Models.entitis;
 using TechXpress.Services.Interfaces;
 using TechXpress.Models.Dto_s;
 using System.Security.Claims;
+using TechXpress.Models.entitis;
 
 namespace TechXpress.Web.Controllers
 {
@@ -174,7 +174,7 @@ namespace TechXpress.Web.Controllers
                     
                     if (cart != null && cart.Items.Any())
                     {
-                        var cartItems = cart.Items.Select(dto => new CartItem
+                        var cartItems = cart.Items.Select(dto => new CartItemDTO
                         {
                             ProductId = dto.ProductId,
                             Quantity = dto.Quantity,
@@ -185,7 +185,7 @@ namespace TechXpress.Web.Controllers
                         {
                             var order = await _orderService.PlaceOrderAsync(userId, cartItems, session.PaymentIntentId ?? sessionId);
                             
-                            if (order.Status == "Paid")
+                            if (order.Status == OrderStatus.Processing)
                             {
                                 return View("Success", order);
                             }

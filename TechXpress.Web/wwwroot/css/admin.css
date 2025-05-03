@@ -1,0 +1,243 @@
+/* Admin Dashboard Styles */
+:root {
+  --primary-color: #4e73df;
+  --secondary-color: #858796;
+  --success-color: #1cc88a;
+  --info-color: #36b9cc;
+  --warning-color: #f6c23e;
+  --danger-color: #e74a3b;
+  --dark-color: #212529;
+  --light-color: #f8f9fc;
+  --card-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+  --sidebar-width: 250px;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: #f8f9fc;
+  overflow-x: hidden;
+}
+
+/* Sidebar styles */
+.sidebar {
+  width: var(--sidebar-width);
+  background-color: var(--dark-color);
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 100;
+  transition: all 0.3s;
+  box-shadow: 0 0.15rem 1.75rem 0 rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-sticky {
+  position: relative;
+  height: 100%;
+  padding-top: 2rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.sidebar .nav-link {
+  padding: 0.8rem 1.5rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.sidebar .nav-link:hover {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-left: 4px solid var(--primary-color);
+  padding-left: calc(1.5rem - 4px);
+}
+
+.sidebar .nav-link.active {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-left: 4px solid var(--primary-color);
+  padding-left: calc(1.5rem - 4px);
+}
+
+.sidebar .nav-link i {
+  margin-right: 0.5rem;
+  font-size: 1.1rem;
+}
+
+/* Main content */
+.main-content {
+  margin-left: var(--sidebar-width);
+  padding: 1.5rem;
+  transition: all 0.3s;
+}
+
+.admin-header {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e3e6f0;
+}
+
+.content-wrapper {
+  width: 100%;
+}
+
+/* Card styles */
+.card {
+  border: none;
+  border-radius: 0.35rem;
+  box-shadow: var(--card-shadow);
+  margin-bottom: 1.5rem;
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.card-header {
+  background-color: var(--light-color);
+  border-bottom: 1px solid #e3e6f0;
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-body {
+  padding: 1.25rem;
+}
+
+/* Dashboard stat cards */
+.border-left-primary {
+  border-left: 0.25rem solid var(--primary-color) !important;
+}
+
+.border-left-success {
+  border-left: 0.25rem solid var(--success-color) !important;
+}
+
+.border-left-info {
+  border-left: 0.25rem solid var(--info-color) !important;
+}
+
+.border-left-warning {
+  border-left: 0.25rem solid var(--warning-color) !important;
+}
+
+.border-left-danger {
+  border-left: 0.25rem solid var(--danger-color) !important;
+}
+
+.text-gray-300 {
+  color: #dddfeb !important;
+}
+
+.text-gray-800 {
+  color: #5a5c69 !important;
+}
+
+/* Tables */
+.table {
+  color: #5a5c69;
+}
+
+.datatable {
+  width: 100% !important;
+}
+
+.product-thumbnail {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 0.25rem;
+}
+
+/* Forms */
+.form-label {
+  font-weight: 500;
+  color: #5a5c69;
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+  background-color: #2653d4;
+  border-color: #244cdd;
+}
+
+.btn-success {
+  background-color: var(--success-color);
+  border-color: var(--success-color);
+}
+
+.btn-success:hover {
+  background-color: #18a674;
+  border-color: #169b6c;
+}
+
+/* Badges */
+.badge {
+  font-weight: 600;
+  padding: 0.25em 0.6em;
+}
+
+/* Charts */
+.chart-area {
+  position: relative;
+  height: 300px;
+  margin-top: 1rem;
+}
+
+/* Alerts */
+.alert {
+  border: none;
+  border-radius: 0.35rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+/* Media queries */
+@media (max-width: 991.98px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+  
+  .main-content {
+    margin-left: 0;
+  }
+  
+  .nav-link i {
+    display: inline-block;
+    width: 24px;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .sidebar {
+    margin-bottom: 2rem;
+  }
+  
+  .card-body {
+    padding: 1rem;
+  }
+  
+  .admin-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .admin-header .btn-toolbar {
+    margin-top: 1rem;
+    width: 100%;
+  }
+  
+  .chart-area {
+    height: 250px;
+  }
+} 

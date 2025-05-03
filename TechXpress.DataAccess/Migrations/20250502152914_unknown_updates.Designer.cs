@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TechXpress.DataAccess.Data;
 
@@ -11,9 +12,11 @@ using TechXpress.DataAccess.Data;
 namespace TechXpress.DataAccess.Migrations
 {
     [DbContext(typeof(TechXpressDbContext))]
-    partial class TechXpressDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250502152914_unknown_updates")]
+    partial class unknown_updates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -188,7 +191,7 @@ namespace TechXpress.DataAccess.Migrations
 
                     b.HasIndex("ShoppingCartId");
 
-                    b.ToTable("CartItems", (string)null);
+                    b.ToTable("CartItems");
                 });
 
             modelBuilder.Entity("TechXpress.Models.entitis.Category", b =>
@@ -209,7 +212,7 @@ namespace TechXpress.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("TechXpress.Models.entitis.Order", b =>
@@ -241,7 +244,7 @@ namespace TechXpress.DataAccess.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("TechXpress.Models.entitis.OrderItem", b =>
@@ -271,7 +274,7 @@ namespace TechXpress.DataAccess.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrderItems", (string)null);
+                    b.ToTable("OrderItems");
                 });
 
             modelBuilder.Entity("TechXpress.Models.entitis.Product", b =>
@@ -312,7 +315,7 @@ namespace TechXpress.DataAccess.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("TechXpress.Models.entitis.ShoppingCart", b =>
@@ -329,7 +332,7 @@ namespace TechXpress.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ShoppingCarts", (string)null);
+                    b.ToTable("ShoppingCarts");
                 });
 
             modelBuilder.Entity("TechXpress.Models.entitis.User", b =>

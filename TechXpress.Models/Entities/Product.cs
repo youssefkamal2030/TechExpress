@@ -11,8 +11,8 @@ namespace TechXpress.Models.entitis
         public string? Description { get; set; }
         public int Stock { get; set; }
         public string? ImageUrl { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public bool IsAvailable { get; set; } = true;
         public virtual Category Category { get; set; }
-       
     }
 }
