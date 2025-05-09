@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using TechXpress.Models.entitis;
+using TechXpress.Models.Dto_s;
 using TechXpress.Services.Interfaces;
 
 namespace TechXpress.Web.Controllers
@@ -17,6 +19,117 @@ namespace TechXpress.Web.Controllers
         {
             _authService = authService;
             _userManager = userManager;
+        }
+
+        [Authorize]
+        public async Task<IActionResult> Profile()
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var profile = await _authService.GetUserProfileAsync(userId);
+                return View(profile);
+            }
+            catch (Exception ex)
+            {
+                ViewBag.ErrorMessage = ex.Message;
+                return View(new ProfileDTO());
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateProfile(ProfileDTO profileDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("Profile", profileDto);
+            }
+
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                profileDto.Id = userId;
+
+                await _authService.UpdateUserProfileAsync(profileDto);
+                
+                if (User.Identity.Name != profileDto.UserName)
+                {
+                    await HttpContext.SignOutAsync("CookieAuth");
+                    
+                    TempData["SuccessMessage"] = "Profile updated successfully. Please log in again with your updated credentials.";
+                    return RedirectToAction("Login");
+                }
+
+                TempData["SuccessMessage"] = "Profile updated successfully.";
+                return RedirectToAction("Profile");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return View("Profile", profileDto);
+            }
+        }
+
+        [Authorize]
+        public IActionResult ChangePassword()
+        {
+            return View(new ChangePasswordDTO());
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDTO model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                await _authService.ChangePasswordAsync(userId, model.CurrentPassword, model.NewPassword);
+                
+                TempData["SuccessMessage"] = "Password changed successfully.";
+                return RedirectToAction("Profile");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return View(model);
+            }
+        }
+
+        [Authorize]
+        public IActionResult DeleteAccount()
+        {
+            return View();
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionName("DeleteAccount")]
+        public async Task<IActionResult> DeleteAccountConfirmed()
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                await _authService.DeleteUserAsync(userId);
+                
+                await HttpContext.SignOutAsync("CookieAuth");
+                
+                TempData["SuccessMessage"] = "Your account has been deleted successfully.";
+                return RedirectToAction("Index", "Home");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Profile");
+            }
         }
 
         public IActionResult Login()

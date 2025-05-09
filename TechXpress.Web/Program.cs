@@ -87,6 +87,7 @@ namespace TechXpress
             });
 
             builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddMemoryCache();
             builder.Services.AddSession(options =>
             {
                 options.IdleTimeout = System.TimeSpan.FromMinutes(30);
@@ -101,6 +102,7 @@ namespace TechXpress
             builder.Services.AddScoped<IOrderRepository, OrderRepository>();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddScoped<IReviewService, TechXpress.Services.Services.ReviewService>();
             builder.Services.AddScoped<IProductService, TechXpress.Services.Services.ProductService>();
             builder.Services.AddScoped<IShoppingCartService, CartService>();
             builder.Services.AddScoped<IOrderService, TechXpress.Services.Services.OrderService>();
@@ -140,12 +142,19 @@ namespace TechXpress
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
+            // Initialize database in background task to avoid blocking app startup
             _ = Task.Run(async () =>
             {
-                using (var scope = app.Services.CreateScope())
+                try
                 {
+                    using var scope = app.Services.CreateScope();
                     var dbInit = scope.ServiceProvider.GetRequiredService<IDbinitializer>();
                     await dbInit.InitializeAsync();
+                }
+                catch (Exception ex)
+                {
+                    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "An error occurred while initializing the database.");
                 }
             });
 

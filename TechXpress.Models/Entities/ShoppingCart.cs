@@ -12,6 +12,7 @@ namespace TechXpress.Models.entitis
 {
     public class ShoppingCart
     {
+        
         public int Id { get; set; }
 
         public string UserId { get; set; }

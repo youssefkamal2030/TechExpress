@@ -10,6 +10,7 @@ namespace TechXpress.DataAccess.Interfaces
         IProductRepository Products { get; }
         ICategoryRepository Categories { get; }
         IShoppingCartRepository ShoppingCarts { get; }
+        IReviewRepository Reviews { get; }
         Task<int> SaveChangesAsync();
         TechXpressDbContext GetContext();
     }

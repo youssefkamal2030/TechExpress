@@ -108,8 +108,12 @@
                             <label class="form-check-label" for="roleAdmin">Admin</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="roles" value="User" id="roleUser">
-                            <label class="form-check-label" for="roleUser">User</label>
+                            <input class="form-check-input" type="checkbox" name="roles" value="Customer" id="roleCustomer">
+                            <label class="form-check-label" for="roleCustomer">Customer</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="roles" value="Seller" id="roleSeller">
+                            <label class="form-check-label" for="roleSeller">Seller</label>
                         </div>
                     </div>
                 </div>
@@ -129,18 +133,19 @@
             $('.edit-roles-btn').on('click', function() {
                 const userId = $(this).data('user-id');
                 const userName = $(this).data('user-name');
-                const roles = $(this).data('roles').split(',');
+                const roles = $(this).data('roles').split(',').filter(r => r !== '');
                 
                 $('#editUserId').val(userId);
                 $('#editUserName').text(userName);
                 
                 // Reset checkboxes
-                $('#roleAdmin, #roleUser').prop('checked', false);
+                $('#roleAdmin, #roleCustomer, #roleSeller').prop('checked', false);
                 
                 // Check the appropriate roles
                 roles.forEach(role => {
                     if (role === 'Admin') $('#roleAdmin').prop('checked', true);
-                    if (role === 'User') $('#roleUser').prop('checked', true);
+                    if (role === 'Customer') $('#roleCustomer').prop('checked', true);
+                    if (role === 'Seller') $('#roleSeller').prop('checked', true);
                 });
                 
                 $('#editRolesModal').modal('show');

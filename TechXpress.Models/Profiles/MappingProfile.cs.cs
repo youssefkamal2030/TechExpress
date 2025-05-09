@@ -14,6 +14,17 @@ namespace TechXpress.Models.Mappings
             CreateMap<User, UserDTO>();
             CreateMap<UserDTO, User>();
             
+            // Profile mappings
+            CreateMap<User, ProfileDTO>();
+            CreateMap<ProfileDTO, User>()
+                .ForMember(dest => dest.Id, opt => opt.Condition((src, dest, srcValue) => srcValue != null));
+            
+            // Review mappings
+            CreateMap<Review, ReviewDTO>()
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.UserName))
+                .ForMember(dest => dest.ProductName, opt => opt.MapFrom(src => src.Product.Name));
+            CreateMap<ReviewDTO, Review>();
+            
             CreateMap<ShoppingCart, ShoppingCartDTO>()
                 .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
             CreateMap<ShoppingCartDTO, ShoppingCart>()

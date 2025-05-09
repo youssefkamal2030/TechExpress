@@ -14,5 +14,6 @@ namespace TechXpress.Models.entitis
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool IsAvailable { get; set; } = true;
         public virtual Category Category { get; set; }
+        public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
     }
 }

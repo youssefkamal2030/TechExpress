@@ -12,6 +12,7 @@ namespace TechXpress.DataAccess.Data
         public IProductRepository Products { get; private set; }
         public ICategoryRepository Categories { get; private set; }
         public IShoppingCartRepository ShoppingCarts { get; private set; }
+        public IReviewRepository Reviews { get; private set; }
 
         public UnitOfWork(TechXpressDbContext context)
         {
@@ -20,6 +21,7 @@ namespace TechXpress.DataAccess.Data
             Products = new ProductRepository(_context);
             Categories = new CategoryRepository(_context);
             ShoppingCarts = new ShoppingCartRepository(_context);
+            Reviews = new ReviewRepository(_context);
         }
 
         public TechXpressDbContext GetContext()

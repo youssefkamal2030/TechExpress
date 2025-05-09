@@ -14,11 +14,35 @@ namespace TechXpress.Services.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IReviewService _reviewService;
 
-        public ProductService(IUnitOfWork unitOfWork, IMapper mapper)
+        public ProductService(IUnitOfWork unitOfWork, IMapper mapper, IReviewService reviewService)
         {
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _reviewService = reviewService ?? throw new ArgumentNullException(nameof(reviewService));
+        }
+
+        public async Task<ProductDTO> GetProductWithReviewsAsync(int id)
+        {
+            var product = await _unitOfWork.Products.GetByIdWithCategoryAsync(id);
+            if (product == null)
+            {
+                throw new KeyNotFoundException($"Product with ID {id} not found.");
+            }
+
+            var productDto = _mapper.Map<ProductDTO>(product);
+            
+            // Add reviews
+            var reviews = await _reviewService.GetProductReviewsAsync(id);
+            productDto.Reviews = reviews.ToList();
+            productDto.ReviewCount = reviews.Count();
+            
+            // Add rating statistics
+            productDto.AverageRating = await _reviewService.GetAverageRatingAsync(id);
+            productDto.RatingBreakdown = await _reviewService.GetRatingBreakdownAsync(id);
+            
+            return productDto;
         }
 
         public async Task<IEnumerable<ProductDTO>> GetAllProductsAsync()
@@ -29,6 +53,22 @@ namespace TechXpress.Services.Services
                 throw new KeyNotFoundException("No products found.");
             }
             return _mapper.Map<IEnumerable<ProductDTO>>(products);
+        }
+
+        public async Task<IEnumerable<ProductDTO>> GetPaginatedProductsAsync(int page, int pageSize)
+        {
+            int skip = (page - 1) * pageSize;
+            var products = await _unitOfWork.Products.GetPaginatedProductsAsync(skip, pageSize);
+            if(products == null)
+            {
+                throw new KeyNotFoundException("No products found.");
+            }
+            return _mapper.Map<IEnumerable<ProductDTO>>(products);
+        }
+
+        public async Task<int> GetProductCountAsync()
+        {
+            return await _unitOfWork.Products.GetProductCountAsync();
         }
 
         public async Task<ProductDTO> GetProductByIdAsync(int id)

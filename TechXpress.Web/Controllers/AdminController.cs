@@ -32,6 +32,7 @@ namespace TechXpress.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
+           
             try
             {
                 var products = await _productService.GetAllProductsAsync();

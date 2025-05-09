@@ -1,0 +1,163 @@
+@model TechXpress.Models.Dto_s.ReviewDTO
+
+@{
+    ViewData["Title"] = "Edit Review";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h2 class="mb-0">Edit Review</h2>
+                </div>
+                <div class="card-body">
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            @TempData["ErrorMessage"]
+                        </div>
+                    }
+
+                    <form asp-controller="Review" asp-action="EditReview" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="Id" value="@Model.Id" />
+                        <input type="hidden" name="ProductId" value="@Model.ProductId" />
+                        <input type="hidden" name="UserName" value="@Model.UserName" />
+                        <input type="hidden" name="UserId" value="@Model.UserId" />
+                        <input type="hidden" name="CreatedAt" value="@Model.CreatedAt.ToString("o")" />
+                        <input type="hidden" name="IsApproved" value="@Model.IsApproved.ToString().ToLower()" />
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Product</label>
+                            <div class="product-info p-3 bg-light rounded">
+                                <h5>@Model.ProductName</h5>
+                                <a asp-controller="Product" asp-action="Details" asp-route-id="@Model.ProductId" class="btn btn-sm btn-outline-primary mt-2">
+                                    <i class="bi bi-eye"></i> View Product
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="Title" class="form-label fw-bold">Review Title</label>
+                            <input id="Title" name="Title" class="form-control" value="@Model.Title" required maxlength="100" />
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Rating</label>
+                            <div class="star-rating">
+                                @for (int i = 5; i >= 1; i--)
+                                {
+                                    <input type="radio" id="star@i" name="Rating" value="@i" @(i == Model.Rating ? "checked" : "") required />
+                                    <label for="star@i" title="@i stars"><i class="bi bi-star-fill"></i></label>
+                                }
+                            </div>
+                            <div class="rating-text mt-2"></div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="Comment" class="form-label fw-bold">Your Review</label>
+                            <textarea id="Comment" name="Comment" class="form-control" rows="5" required maxlength="500">@Model.Comment</textarea>
+                            <div class="form-text text-muted">
+                                <span id="charCount">0</span>/500 characters
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a asp-controller="Review" asp-action="MyReviews" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Back to My Reviews
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check2"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        /* Star Rating CSS */
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .star-rating input {
+            display: none;
+        }
+
+        .star-rating label {
+            cursor: pointer;
+            font-size: 2rem;
+            color: #ddd;
+            margin-right: 8px;
+            transition: color 0.2s ease;
+        }
+
+        .star-rating label:hover,
+        .star-rating label:hover ~ label,
+        .star-rating input:checked ~ label {
+            color: #ffc107;
+        }
+        
+        .product-info {
+            border-left: 4px solid var(--bs-primary);
+        }
+        
+        .rating-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Character count for comment
+            const commentElem = document.getElementById('Comment');
+            const charCountElem = document.getElementById('charCount');
+            
+            function updateCharCount() {
+                const length = commentElem.value.length;
+                charCountElem.textContent = length;
+                
+                if (length > 450) {
+                    charCountElem.classList.add('text-danger');
+                } else {
+                    charCountElem.classList.remove('text-danger');
+                }
+            }
+            
+            commentElem.addEventListener('input', updateCharCount);
+            updateCharCount(); // Initial count
+            
+            // Rating text feedback
+            const ratingText = document.querySelector('.rating-text');
+            const ratingLabels = {
+                '5': 'Excellent',
+                '4': 'Very Good',
+                '3': 'Good',
+                '2': 'Fair',
+                '1': 'Poor'
+            };
+            
+            const starInputs = document.querySelectorAll('.star-rating input');
+            starInputs.forEach(input => {
+                if (input.checked) {
+                    ratingText.textContent = ratingLabels[input.value];
+                }
+                
+                input.addEventListener('change', function() {
+                    ratingText.textContent = ratingLabels[this.value];
+                });
+            });
+        });
+    </script>
+} 

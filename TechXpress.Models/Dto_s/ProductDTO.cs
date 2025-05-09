@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations;
+using TechXpress.Models.Dto_s;
 
 namespace TechXpress.Models.Dto_s
 {
@@ -36,5 +37,11 @@ namespace TechXpress.Models.Dto_s
         
         [Display(Name = "Available for Purchase")]
         public bool IsAvailable { get; set; } = true;
+        
+        // Review-related properties
+        public ICollection<ReviewDTO> Reviews { get; set; } = new List<ReviewDTO>();
+        public double AverageRating { get; set; }
+        public int ReviewCount { get; set; }
+        public Dictionary<int, int> RatingBreakdown { get; set; } = new Dictionary<int, int>();
     }
 }

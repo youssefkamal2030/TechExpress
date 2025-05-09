@@ -6,5 +6,7 @@ namespace TechXpress.DataAccess.Interfaces
     {
         Task<IEnumerable<Product>> GetAllWithCategoryAsync();
         Task<Product> GetByIdWithCategoryAsync(int id);
+        Task<IEnumerable<Product>> GetPaginatedProductsAsync(int skip, int take);
+        Task<int> GetProductCountAsync();
     }
 }

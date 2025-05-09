@@ -28,6 +28,21 @@ namespace TechXpress.DataAccess.Repositories
         {
             return await _context.Products.Include(p => p.Category).FirstOrDefaultAsync(p => p.Id == id);
         }
+        
+        public async Task<IEnumerable<Product>> GetPaginatedProductsAsync(int skip, int take)
+        {
+            return await _context.Products
+                .Include(p => p.Category)
+                .OrderByDescending(p => p.CreatedAt)
+                .Skip(skip)
+                .Take(take)
+                .ToListAsync();
+        }
+        
+        public async Task<int> GetProductCountAsync()
+        {
+            return await _context.Products.CountAsync();
+        }
 
         public new async Task<IEnumerable<Product>> FindAsync(Expression<Func<Product, bool>> predicate)
         {

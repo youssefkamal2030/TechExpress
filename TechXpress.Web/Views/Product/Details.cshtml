@@ -17,18 +17,35 @@
 else
 {
     <div class="container py-5">
+        <!-- Display success/error messages -->
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                @TempData["SuccessMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                @TempData["ErrorMessage"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+        
         <div class="row">
             <!-- Product Image -->
             <div class="col-md-6 mb-4">
-                <div class="card shadow-sm">
-                    <img src="@Model.ImageUrl" class="card-img-top" alt="@Model.Name" style="height: 500px; object-fit: cover;">
+                <div class="card shadow-sm product-image-card">
+                    <img src="@(string.IsNullOrEmpty(Model.ImageUrl) ? "/images/default-product.jpg" : Model.ImageUrl)" 
+                         class="card-img-top product-main-image" alt="@Model.Name">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="btn-group">
-                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="shareProduct()">
+                                <button type="button" class="btn btn-outline" onclick="shareProduct()">
                                     <i class="bi bi-share me-1"></i>Share
                                 </button>
-                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="addToWishlist(@Model.Id)">
+                                <button type="button" class="btn btn-outline" onclick="addToWishlist(@Model.Id)">
                                     <i class="bi bi-heart me-1"></i>Wishlist
                                 </button>
                             </div>
@@ -44,24 +61,47 @@ else
             <div class="col-md-6">
                 <div class="card shadow-sm">
                     <div class="card-body">
-                        <h1 class="card-title mb-3">@Model.Name</h1>
+                        <h1 class="product-title mb-3">@Model.Name</h1>
                         
-                        <div class="mb-3">
+                        <div class="mb-3 product-meta">
                             <span class="badge bg-primary me-2">@Model.CategoryName</span>
+                            
+                            <!-- Rating Stars -->
+                            <div class="d-inline-block ms-2 product-rating">
+                                <div class="stars d-inline-block">
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="bi @(i <= Math.Round(Model.AverageRating) ? "bi-star-fill" : "bi-star")"></i>
+                                    }
+                                </div>
+                                <span class="rating-count ms-2">(@Model.ReviewCount @(Model.ReviewCount == 1 ? "review" : "reviews"))</span>
+                            </div>
                         </div>
 
-                        <div class="mb-4">
-                            <h2 class="text-primary mb-0">$@Model.Price.ToString("F2")</h2>
+                        <div class="mb-4 product-price">
+                            <h2 class="current-price">$@Model.Price.ToString("F2")</h2>
+                            @if (Model.Stock <= 0)
+                            {
+                                <span class="badge bg-danger ms-2">Out of Stock</span>
+                            }
+                            else if (Model.Stock < 10)
+                            {
+                                <span class="badge bg-warning text-dark ms-2">Only @Model.Stock left</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success ms-2">In Stock</span>
+                            }
                         </div>
 
-                        <p class="card-text mb-4">@Model.Description</p>
+                        <p class="product-description mb-4">@Model.Description</p>
 
-                        <div class="mb-4">
-                            <h5 class="mb-3">Product Information</h5>
+                        <div class="mb-4 product-info">
+                            <h5 class="section-title mb-3">Product Information</h5>
                             <div class="row">
                                 <div class="col-6">
                                     <p class="mb-2"><strong>Category:</strong> @Model.CategoryName</p>
-                                    <p class="mb-2"><strong>Stock:</strong> @(Model.Stock > 0 ? "In Stock" : "Out of Stock")</p>
+                                    <p class="mb-2"><strong>Stock:</strong> @(Model.Stock > 0 ? $"{Model.Stock} units" : "Out of Stock")</p>
                                 </div>
                                 <div class="col-6">
                                     <p class="mb-2"><strong>Added:</strong> @Model.CreatedAt.ToString("MMMM dd, yyyy")</p>
@@ -69,19 +109,218 @@ else
                             </div>
                         </div>
 
-                        <div class="d-flex align-items-center mb-4">
-                            <div class="input-group me-3" style="width: 150px;">
-                                <button class="btn btn-outline-secondary" type="button" onclick="decreaseQuantity()">-</button>
+                        <div class="d-flex align-items-center mb-4 product-actions">
+                            <div class="input-group me-3 quantity-selector" style="width: 150px;">
+                                <button class="btn btn-outline" type="button" onclick="decreaseQuantity()">
+                                    <i class="bi bi-dash"></i>
+                                </button>
                                 <input type="number" class="form-control text-center" id="quantity" value="1" min="1" max="@Model.Stock">
-                                <button class="btn btn-outline-secondary" type="button" onclick="increaseQuantity()">+</button>
+                                <button class="btn btn-outline" type="button" onclick="increaseQuantity()">
+                                    <i class="bi bi-plus"></i>
+                                </button>
                             </div>
-                            <button class="btn btn-primary flex-grow-1" onclick="addToCart(@Model.Id)">
+                            <button class="btn btn-primary flex-grow-1" 
+                                    @if (Model.Stock <= 0) { <text>disabled</text> }
+                                    onclick="addToCart(@Model.Id, parseInt(document.getElementById('quantity').value))">
                                 <i class="bi bi-cart-plus me-2"></i>Add to Cart
                             </button>
                         </div>
 
-                        <div class="alert alert-info" role="alert">
+                        <div class="alert alert-info shipping-info" role="alert">
                             <i class="bi bi-truck me-2"></i>Free shipping on orders over $50
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reviews Section -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">Customer Reviews</h3>
+                        <span class="badge bg-light text-dark">@Model.ReviewCount @(Model.ReviewCount == 1 ? "Review" : "Reviews")</span>
+                    </div>
+                    <div class="card-body">
+                        <!-- Rating Summary -->
+                        <div class="mb-4">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="text-center mb-3 rating-summary">
+                                        <h1 class="display-4 fw-bold">@Model.AverageRating.ToString("0.0")</h1>
+                                        <div class="stars stars-large mb-2">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                                <i class="bi @(i <= Math.Round(Model.AverageRating) ? "bi-star-fill" : "bi-star")"></i>
+                                            }
+                                        </div>
+                                        <p class="text-muted">Based on @Model.ReviewCount reviews</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <h5>Rating Breakdown</h5>
+                                    @for (int i = 5; i >= 1; i--)
+                                    {
+                                        var count = Model.RatingBreakdown.ContainsKey(i) ? Model.RatingBreakdown[i] : 0;
+                                        var percentage = Model.ReviewCount > 0 ? (count * 100 / Model.ReviewCount) : 0;
+                                        <div class="d-flex align-items-center mb-1 rating-bar">
+                                            <div class="text-nowrap me-2">@i <i class="bi bi-star-fill"></i></div>
+                                            <div class="progress flex-grow-1" style="height: 12px;">
+                                                <div class="progress-bar bg-warning" role="progressbar" style="width: @percentage%;"
+                                                     aria-valuenow="@percentage" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <div class="ms-2 text-nowrap">@count (@percentage%)</div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Write Review Form -->
+                        @if (User.Identity.IsAuthenticated && !(bool)ViewBag.UserHasReviewed)
+                        {
+                            <div class="mb-4 review-form-container">
+                                <h4 class="section-title">Write a Review</h4>
+                                <form asp-controller="Review" asp-action="SubmitReview" method="post" class="mt-3">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="ProductId" value="@Model.Id" />
+                                    
+                                    <div class="mb-3">
+                                        <label for="Title" class="form-label">Review Title</label>
+                                        <input type="text" class="form-control" id="Title" name="Title" 
+                                               required maxlength="100" placeholder="Summarize your experience">
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="Rating" class="form-label">Rating</label>
+                                        <div class="rating-input">
+                                            @for (int i = 5; i >= 1; i--)
+                                            {
+                                                <input type="radio" id="star@i" name="Rating" value="@i" required @(i == 5 ? "checked" : "") />
+                                                <label for="star@i" title="@i stars"><i class="bi bi-star-fill"></i></label>
+                                            }
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="Comment" class="form-label">Your Review</label>
+                                        <textarea class="form-control" id="Comment" name="Comment" rows="4" 
+                                                  required maxlength="500" placeholder="Share your experience with this product"></textarea>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-primary">Submit Review</button>
+                                </form>
+                            </div>
+                        }
+                        else if (User.Identity.IsAuthenticated && (bool)ViewBag.UserHasReviewed)
+                        {
+                            <div class="alert alert-info">
+                                You have already submitted a review for this product. You can edit your review from the "My Reviews" page.
+                                <a asp-controller="Review" asp-action="MyReviews" class="alert-link">View My Reviews</a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-info">
+                                <a asp-controller="Account" asp-action="Login" class="alert-link">Sign in</a> to write a review.
+                            </div>
+                        }
+
+                        <!-- Reviews List -->
+                        <div class="reviews-container mt-4">
+                            <h4 class="section-title mb-3">
+                                @Model.Reviews.Count() @(Model.Reviews.Count() == 1 ? "Review" : "Reviews")
+                            </h4>
+                            @if (!Model.Reviews.Any())
+                            {
+                                <div class="alert alert-light text-center">
+                                    <i class="bi bi-chat-square-text me-2"></i>
+                                    No reviews yet. Be the first to review this product!
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="reviews-list">
+                                    @foreach (var review in Model.Reviews)
+                                    {
+                                        <div class="review-card mb-3">
+                                            <div class="review-header d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h5 class="review-title mb-1">@review.Title</h5>
+                                                    <div class="stars mb-1">
+                                                        @for (int i = 1; i <= 5; i++)
+                                                        {
+                                                            <i class="bi @(i <= review.Rating ? "bi-star-fill" : "bi-star")"></i>
+                                                        }
+                                                    </div>
+                                                </div>
+                                                <div class="review-date">
+                                                    <small class="text-muted">@review.CreatedAt.ToString("MMM dd, yyyy")</small>
+                                                </div>
+                                            </div>
+                                            <div class="review-content">
+                                                <p class="review-comment">@review.Comment</p>
+                                                <div class="review-author">
+                                                    <i class="bi bi-person-circle me-1"></i>
+                                                    <span class="author-name">@review.UserName</span>
+                                                </div>
+                                                
+                                                @{
+                                                    bool isAuthorOrAdmin = false;
+                                                    if (User.IsInRole("Admin"))
+                                                    {
+                                                        isAuthorOrAdmin = true;
+                                                    }
+                                                    else if (User.Identity.IsAuthenticated)
+                                                    {
+                                                        var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                                                        if (userId != null && userId == review.UserId)
+                                                        {
+                                                            isAuthorOrAdmin = true;
+                                                        }
+                                                    }
+                                                }
+                                                
+                                                @if (isAuthorOrAdmin)
+                                                {
+                                                    <div class="review-actions mt-2">
+                                                        <button class="btn btn-sm btn-outline-danger" 
+                                                                data-bs-toggle="modal" 
+                                                                data-bs-target="#deleteReviewModal-@review.Id">
+                                                            <i class="bi bi-trash"></i> Delete
+                                                        </button>
+                                                        
+                                                        <!-- Delete Review Modal -->
+                                                        <div class="modal fade" id="deleteReviewModal-@review.Id" tabindex="-1">
+                                                            <div class="modal-dialog">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title">Confirm Deletion</h5>
+                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                    </div>
+                                                                    <div class="modal-body">
+                                                                        <p>Are you sure you want to delete this review?</p>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                        <form asp-controller="Review" asp-action="DeleteReview" method="post" class="d-inline">
+                                                                            @Html.AntiForgeryToken()
+                                                                            <input type="hidden" name="reviewId" value="@review.Id" />
+                                                                            <input type="hidden" name="returnUrl" value="@Url.Action("Details", "Product", new { id = Model.Id })" />
+                                                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                                                        </form>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
@@ -93,66 +332,255 @@ else
         {
             <div class="row mt-5">
                 <div class="col-12">
-                    <h3 class="mb-4">You may also like</h3>
-                </div>
-                @foreach (var product in ViewBag.RelatedProducts)
-                {
-                    <div class="col-md-3 mb-4">
-                        <div class="card h-100">
-                            <img class="card-img-top" src="@product.ImageUrl" alt="@product.Name" style="height: 200px; object-fit: cover;">
-                            <div class="card-body">
-                                <h5 class="card-title">@product.Name</h5>
-                                <p class="card-text text-primary">$@product.Price.ToString("F2")</p>
-                            </div>
-                            <div class="card-footer bg-transparent">
-                                <a href="@Url.Action("Details", "Product", new { id = product.Id })" class="btn btn-outline-primary w-100">
-                                    View Details
-                                </a>
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-light">
+                            <h3 class="mb-0">Related Products</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="related-products-grid">
+                                @foreach (var relatedProduct in (IEnumerable<TechXpress.Models.Dto_s.ProductDTO>)ViewBag.RelatedProducts)
+                                {
+                                    <div class="product-card">
+                                        <div class="product-image">
+                                            <a asp-controller="Product" asp-action="Details" asp-route-id="@relatedProduct.Id">
+                                                <img src="@(string.IsNullOrEmpty(relatedProduct.ImageUrl) ? "/images/default-product.jpg" : relatedProduct.ImageUrl)" alt="@relatedProduct.Name">
+                                            </a>
+                                        </div>
+                                        <div class="product-info">
+                                            <h3><a asp-controller="Product" asp-action="Details" asp-route-id="@relatedProduct.Id">@relatedProduct.Name</a></h3>
+                                            <div class="stars">
+                                                @for (int i = 1; i <= 5; i++)
+                                                {
+                                                    <i class="bi @(i <= Math.Round(relatedProduct.AverageRating) ? "bi-star-fill" : "bi-star")"></i>
+                                                }
+                                                <span class="rating-count">(@relatedProduct.ReviewCount)</span>
+                                            </div>
+                                            <div class="product-price">
+                                                <span class="current-price">$@relatedProduct.Price.ToString("F2")</span>
+                                            </div>
+                                            <button class="btn btn-primary btn-sm" 
+                                                    onclick="addToCart(@relatedProduct.Id, 1)" 
+                                                    @if (relatedProduct.Stock <= 0) { <text>disabled</text> }>
+                                                Add to Cart
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
                             </div>
                         </div>
                     </div>
-                }
+                </div>
             </div>
         }
     </div>
 }
 
+@section Styles {
+    <style>
+        /* Product Details Styling */
+        .product-main-image {
+            height: 400px;
+            object-fit: contain;
+            background-color: #f8f9fa;
+        }
+        
+        .product-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--tech-dark);
+        }
+        
+        .product-meta {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .product-rating {
+            display: flex;
+            align-items: center;
+        }
+        
+        .stars {
+            color: #f7c32e;
+            font-size: 0.9rem;
+        }
+        
+        .stars-large {
+            font-size: 1.5rem;
+        }
+        
+        .rating-count {
+            color: #64748B;
+            font-size: 0.8rem;
+        }
+        
+        .product-price {
+            display: flex;
+            align-items: center;
+        }
+        
+        .current-price {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--tech-blue);
+        }
+        
+        .product-description {
+            color: #4B5563;
+            line-height: 1.6;
+        }
+        
+        .section-title {
+            font-weight: 600;
+            color: var(--tech-dark);
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 50px;
+            height: 2px;
+            background-color: var(--tech-blue);
+        }
+        
+        .quantity-selector .btn {
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .quantity-selector input {
+            border: 1px solid #e2e8f0;
+        }
+        
+        /* Reviews Styling */
+        .rating-summary {
+            padding: 1rem;
+            border-radius: var(--radius-lg);
+            background-color: #f8f9fa;
+        }
+        
+        .rating-bar {
+            font-size: 0.85rem;
+        }
+        
+        .review-card {
+            padding: 1.25rem;
+            border: 1px solid #e2e8f0;
+            border-radius: var(--radius-lg);
+            background-color: white;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .review-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .review-title {
+            font-weight: 600;
+            color: var(--tech-dark);
+        }
+        
+        .review-comment {
+            color: #4B5563;
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+        
+        .review-author {
+            display: flex;
+            align-items: center;
+            color: #64748B;
+            font-size: 0.9rem;
+        }
+        
+        .author-name {
+            font-weight: 500;
+        }
+        
+        /* Star Rating System */
+        .rating-input {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+        
+        .rating-input input {
+            display: none;
+        }
+        
+        .rating-input label {
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: #ddd;
+            margin-right: 5px;
+        }
+        
+        .rating-input label:hover,
+        .rating-input label:hover ~ label,
+        .rating-input input:checked ~ label {
+            color: #f7c32e;
+        }
+        
+        /* Related Products */
+        .related-products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        @@media (min-width: 768px) {
+            .related-products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+        }
+    </style>
+}
+
 @section Scripts {
     <script>
+        // Quantity selector functionality
         function increaseQuantity() {
-            const input = document.getElementById('quantity');
-            const max = parseInt(input.max);
-            if (input.value < max) {
-                input.value = parseInt(input.value) + 1;
+            var input = document.getElementById('quantity');
+            var max = parseInt(input.getAttribute('max'));
+            var currentVal = parseInt(input.value);
+            
+            if (currentVal < max) {
+                input.value = currentVal + 1;
             }
         }
-
+        
         function decreaseQuantity() {
-            const input = document.getElementById('quantity');
-            if (input.value > 1) {
-                input.value = parseInt(input.value) - 1;
+            var input = document.getElementById('quantity');
+            var currentVal = parseInt(input.value);
+            
+            if (currentVal > 1) {
+                input.value = currentVal - 1;
             }
         }
-
-        function addToCart(productId) {
-            const quantity = document.getElementById('quantity').value;
-            addToCart(productId, quantity);
-        }
-
+        
+        // Share product functionality
         function shareProduct() {
             if (navigator.share) {
                 navigator.share({
-                    title: '@Model?.Name',
-                    text: 'Check out this amazing product!',
+                    title: '@Model.Name',
+                    text: '@(Model.Description != null ? Model.Description.Substring(0, Math.Min(100, Model.Description.Length)) : "")',
                     url: window.location.href
-                });
+                })
+                .catch(error => console.error('Error sharing:', error));
             } else {
-                alert('Sharing is not supported in your browser');
+                // Fallback for browsers that don't support Web Share API
+                alert('Copy this link to share: ' + window.location.href);
             }
         }
-
+        
+        // Wishlist functionality (placeholder)
         function addToWishlist(productId) {
-            alert('Wishlist functionality coming soon!');
+            alert('Wishlist feature coming soon!');
         }
     </script>
 }

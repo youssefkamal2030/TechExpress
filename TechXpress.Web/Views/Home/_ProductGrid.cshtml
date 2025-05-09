@@ -1,0 +1,31 @@
+@model IEnumerable<TechXpress.Models.Dto_s.ProductDTO>
+
+@foreach (var product in Model)
+{
+    <div class="product-card">
+        <div class="product-image">
+            @if (product.Price < product.Price * 1.2m) {
+                <span class="discount-badge">-@(Math.Round((1 - (product.Price / (product.Price * 1.2m))) * 100))%</span>
+            }
+            <a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id">
+                <img loading="lazy" src="@(string.IsNullOrEmpty(product.ImageUrl) ? "https://placehold.co/600x400?text=Product+Image" : product.ImageUrl)" alt="@product.Name">
+            </a>
+        </div>
+        <div class="product-info">
+            <h3><a asp-controller="Product" asp-action="Details" asp-route-id="@product.Id">@product.Name</a></h3>
+            <p>@(string.IsNullOrEmpty(product.Description) ? "No description available" : 
+                (product.Description.Length > 50 ? product.Description.Substring(0, 50) + "..." : product.Description))</p>
+            <div class="product-price">
+                <span class="current-price">$@product.Price.ToString("F2")</span>
+                @if (product.Price < product.Price * 1.2m)
+                {
+                    <span class="original-price">$@((product.Price * 1.2m).ToString("F2"))</span>
+                }
+            </div>
+            <button type="button" class="btn btn-primary btn-full" onclick="addToCart(@product.Id, 1)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path></svg>
+                Add to Cart
+            </button>
+        </div>
+    </div>
+} 

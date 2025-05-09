@@ -1,100 +1,115 @@
-﻿@model IEnumerable<TechXpress.Models.Dto_s.ProductDTO>
+@model IEnumerable<TechXpress.Models.Dto_s.ProductDTO>
+@{
+    ViewData["Title"] = "Home";
+}
 
-<div class="container mt-4">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <form asp-action="Index" method="get" class="row g-3">
-                        <div class="col-md-4">
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-0">
-                                    <i class="bi bi-search"></i>
-                                </span>
-                                <input type="text" name="searchTerm" class="form-control border-0 bg-light" placeholder="Search products..." value="@ViewBag.SearchTerm">
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-0">
-                                    <i class="bi bi-grid-3x3"></i>
-                                </span>
-                                <select name="categoryId" class="form-select border-0 bg-light">
-                                    <option value="">All Categories</option>
-                                    @foreach (var category in ViewBag.Categories)
-                                    {
-                                        <option value="@category.Id" selected="@(ViewBag.CurrentCategoryId == category.Id)">@category.Name</option>
-                                    }
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-0">
-                                    <i class="bi bi-currency-dollar"></i>
-                                </span>
-                                <input type="number" name="minPrice" class="form-control border-0 bg-light" placeholder="Min Price" value="@ViewBag.MinPrice" step="0.01">
-                            </div>
-                        </div>
-                        <div class="col-md-2">
-                            <div class="input-group">
-                                <span class="input-group-text bg-light border-0">
-                                    <i class="bi bi-currency-dollar"></i>
-                                </span>
-                                <input type="number" name="maxPrice" class="form-control border-0 bg-light" placeholder="Max Price" value="@ViewBag.MaxPrice" step="0.01">
-                            </div>
-                        </div>
-                        <div class="col-md-1">
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="bi bi-funnel me-1"></i>Filter
-                            </button>
-                        </div>
-                    </form>
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <div class="hero-text fade-in">
+                <h1>Next-Gen Tech <br><span>At Your Fingertips</span></h1>
+                <p>TechXpress brings you the latest technology products with a seamless shopping experience. Find exactly what you need, exactly when you need it.</p>
+                <div class="hero-buttons">
+                    <a asp-controller="Product" asp-action="Index" class="btn btn-primary">Shop Now 
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                    </a>
+                    <a href="#categories" class="btn btn-outline btn-light">Browse Categories</a>
+                </div>
+            </div>
+            <div class="hero-image fade-in">
+                <div class="image-container">
+                    <div class="blue-blur"></div>
+                    <div class="accent-blur"></div>
+                    <img loading="lazy" width="600" height="400" src="https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&q=80&w=600" alt="Technology Products">
                 </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 
-<section class="py-5">
-    <div class="container px-4 px-lg-5 mt-5">
-        <div class="row gx-4 gx-lg-5 row-cols-2 row-cols-md-3 row-cols-xl-4 justify-content-center">
-            @foreach (var product in Model)
+<!-- Featured Categories -->
+<section id="categories" class="featured-categories">
+    <div class="container">
+        <div class="section-header">
+            <h2>Shop By Category</h2>
+            <p>Explore our wide range of technology products across multiple categories</p>
+        </div>
+        
+        <div class="category-grid">
+            @if (ViewBag.Categories != null && ((IEnumerable<TechXpress.Models.Dto_s.CategoryDTO>)ViewBag.Categories).Any())
             {
-                <div class="col mb-5">
-                    <div class="card h-100">
-                        <!-- Product image-->
-                        <div class="position-relative">
-                            <img class="card-img-top" src="@product.ImageUrl" alt="@product.Name" />
-                            <div class="position-absolute top-0 end-0 p-2">
-                                <span class="badge bg-primary">New</span>
-                            </div>
-                        </div>
-                        <!-- Product details-->
-                        <div class="card-body p-4">
-                            <div class="text-center">
-                                <!-- Product name-->
-                                <h5 class="fw-bolder">@product.Name</h5>
-                                <!-- Product price-->
-                                <div class="d-flex justify-content-center align-items-center">
-                                    <span class="text-muted text-decoration-line-through me-2">$@(product.Price)</span>
-                                    <span class="text-primary fw-bold">$@product.Price</span>
+                @foreach (var category in (IEnumerable<TechXpress.Models.Dto_s.CategoryDTO>)ViewBag.Categories)
+                {
+                    <div class="category-card">
+                        <div class="category-image">
+                            <img src="@(string.IsNullOrEmpty(category.ImageUrl) ? "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&q=80" : category.ImageUrl)" alt="@category.Name">
+                            <div class="category-overlay">
+                                <h3>@category.Name</h3>
+                                <p>@(string.IsNullOrEmpty(category.Description) ? "Explore our great selection" : category.Description)</p>
+                                <div class="category-meta">
+                                    <span class="category-count">@category.ProductCount Products</span>
+                                    <a asp-controller="Product" asp-action="Index" asp-route-categoryId="@category.Id" class="category-link">View All →</a>
                                 </div>
                             </div>
                         </div>
-                        <!-- Product actions-->
-                        <div class="card-footer p-4 pt-0 border-top-0 bg-transparent">
-                            <div class="text-center">
-                                <a class="btn btn-outline-primary mt-auto" href="@Url.Action("Details", "Product", new { id = product.Id })">
-                                    <i class="bi bi-eye me-1"></i>View Details
-                                </a>
-                                <form asp-action="AddToCart" asp-controller="Cart" method="post" class="d-inline">
-                                    <input type="hidden" name="id" value="@product.Id" />
-                                    <input type="hidden" name="quantity" value="1" />
-                                    <button type="submit" class="btn btn-primary mt-auto">
-                                        <i class="bi bi-cart-plus me-1"></i>Add to cart
-                                    </button>
-                                </form>
+                    </div>
+                }
+            }
+            else
+            {
+                <!-- Fallback content if no categories are available -->
+                <div class="category-card">
+                    <div class="category-image">
+                        <img src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&q=80" alt="Laptops">
+                        <div class="category-overlay">
+                            <h3>Laptops</h3>
+                            <p>Powerful notebooks for work and play</p>
+                            <div class="category-meta">
+                                <span class="category-count">Products</span>
+                                <a asp-controller="Product" asp-action="Index" class="category-link">View All →</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="category-card">
+                    <div class="category-image">
+                        <img src="https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&q=80" alt="Smartphones">
+                        <div class="category-overlay">
+                            <h3>Smartphones</h3>
+                            <p>Latest mobile devices and accessories</p>
+                            <div class="category-meta">
+                                <span class="category-count">Products</span>
+                                <a asp-controller="Product" asp-action="Index" class="category-link">View All →</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="category-card">
+                    <div class="category-image">
+                        <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80" alt="Components">
+                        <div class="category-overlay">
+                            <h3>Components</h3>
+                            <p>Build your perfect setup</p>
+                            <div class="category-meta">
+                                <span class="category-count">Products</span>
+                                <a asp-controller="Product" asp-action="Index" class="category-link">View All →</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="category-card">
+                    <div class="category-image">
+                        <img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&q=80" alt="Software">
+                        <div class="category-overlay">
+                            <h3>Software</h3>
+                            <p>Digital solutions for every need</p>
+                            <div class="category-meta">
+                                <span class="category-count">Products</span>
+                                <a asp-controller="Product" asp-action="Index" class="category-link">View All →</a>
                             </div>
                         </div>
                     </div>
@@ -103,3 +118,263 @@
         </div>
     </div>
 </section>
+
+<!-- Special Offers -->
+<section class="special-offers">
+    <div class="container">
+        <div class="section-header-with-link">
+            <div>
+                <h2>Special Offers</h2>
+                <p>Limited time deals on premium technology</p>
+            </div>
+            <a asp-controller="Product" asp-action="Index" class="btn btn-outline btn-desktop-only">View All Offers</a>
+        </div>
+        
+        <div class="product-grid" id="product-grid">
+            @if (Model != null && Model.Any())
+            {
+                <partial name="_ProductGrid" model="Model" />
+            }
+            else
+            {
+                <!-- Fallback products if no products are available -->
+                <div class="product-card">
+                    <div class="product-image">
+                        <span class="discount-badge">-15%</span>
+                        <img src="https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&q=80" alt="UltraBook Pro X1">
+                    </div>
+                    <div class="product-info">
+                        <h3>UltraBook Pro X1</h3>
+                        <p>13-inch, 16GB RAM, 512GB SSD</p>
+                        <div class="product-price">
+                            <span class="current-price">$1099.99</span>
+                            <span class="original-price">$1299.99</span>
+                        </div>
+                        <a asp-controller="Product" asp-action="Index" class="btn btn-primary btn-full">View Products</a>
+                    </div>
+                </div>
+                
+                <div class="product-card">
+                    <div class="product-image">
+                        <span class="discount-badge">-20%</span>
+                        <img src="https://images.unsplash.com/photo-1487215078519-e21cc028cb29?auto=format&fit=crop&q=80" alt="TechPro Headphones">
+                    </div>
+                    <div class="product-info">
+                        <h3>TechPro Noise-Canceling Headphones</h3>
+                        <p>Wireless, 30hr battery life</p>
+                        <div class="product-price">
+                            <span class="current-price">$279.99</span>
+                            <span class="original-price">$349.99</span>
+                        </div>
+                        <a asp-controller="Product" asp-action="Index" class="btn btn-primary btn-full">View Products</a>
+                    </div>
+                </div>
+                
+                <div class="product-card">
+                    <div class="product-image">
+                        <span class="discount-badge">-17%</span>
+                        <img src="https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&q=80" alt="PowerTab S7">
+                    </div>
+                    <div class="product-info">
+                        <h3>PowerTab S7</h3>
+                        <p>10.5-inch, 128GB Storage</p>
+                        <div class="product-price">
+                            <span class="current-price">$499.99</span>
+                            <span class="original-price">$599.99</span>
+                        </div>
+                        <a asp-controller="Product" asp-action="Index" class="btn btn-primary btn-full">View Products</a>
+                    </div>
+                </div>
+                
+                <div class="product-card">
+                    <div class="product-image">
+                        <span class="discount-badge">-17%</span>
+                        <img src="https://images.unsplash.com/photo-1580910051074-3eb694886505?auto=format&fit=crop&q=80" alt="PrimePhone 5G">
+                    </div>
+                    <div class="product-info">
+                        <h3>PrimePhone 5G</h3>
+                        <p>6.2-inch AMOLED, 256GB</p>
+                        <div class="product-price">
+                            <span class="current-price">$749.99</span>
+                            <span class="original-price">$899.99</span>
+                        </div>
+                        <a asp-controller="Product" asp-action="Index" class="btn btn-primary btn-full">View Products</a>
+                    </div>
+                </div>
+            }
+        </div>
+        
+        <div class="text-center mt-4">
+            @if (ViewBag.HasMoreProducts == true)
+            {
+                <button type="button" id="load-more-btn" class="btn btn-outline-primary" 
+                        data-current-page="@ViewBag.CurrentPage" 
+                        onclick="loadMoreProducts()">
+                    See More Products
+                    <i class="bi bi-arrow-down-circle"></i>
+                </button>
+                <div id="loading-spinner" class="spinner-border text-primary d-none" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            }
+            <a asp-controller="Product" asp-action="Index" class="btn btn-outline mt-2 mobile-only">View All Offers</a>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="features">
+    <div class="container">
+        <div class="section-header">
+            <h2>Why Shop With Us</h2>
+            <p>TechXpress offers a superior shopping experience with benefits you'll love</p>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 14.5c2.33 1.67 5.67 1.67 8 0"></path><path d="M5 18h14"></path><path d="M6.5 4h11l.5 12H6l.5-12Z"></path></svg>
+                </div>
+                <h3>Fast & Free Shipping</h3>
+                <p>Free delivery on all orders above $50</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg>
+                </div>
+                <h3>Secure Payments</h3>
+                <p>Multiple secure payment options</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>
+                </div>
+                <h3>Money-Back Guarantee</h3>
+                <p>30-day return policy for peace of mind</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                </div>
+                <h3>24/7 Customer Support</h3>
+                <p>Assistance available round the clock</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter -->
+<section class="newsletter">
+    <div class="container">
+        <div class="newsletter-content">
+            <h2>Stay Updated on Latest Tech</h2>
+            <p>Subscribe to our newsletter for exclusive deals, new product arrivals, and tech tips</p>
+            
+            <form id="newsletter-form" class="newsletter-form" method="post" asp-controller="Home" asp-action="Subscribe">
+                @Html.AntiForgeryToken()
+                <div class="form-group">
+                    <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                    <button type="submit" class="btn btn-light" id="subscribe-btn">Subscribe</button>
+                </div>
+                <p class="form-note">By subscribing, you agree to our Privacy Policy and consent to receive updates from TechXpress</p>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        function addToCart(productId, quantity) {
+            console.log("Adding product to cart:", productId, quantity);
+            
+            // Show loading indicator if you have one
+            
+            fetch('/Cart/AddToCart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify({
+                    productId: productId,
+                    quantity: quantity
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Cart response:", data);
+                
+                // Show success message
+                const toast = new bootstrap.Toast(document.getElementById('cartToast'));
+                toast.show();
+                
+                // Update cart count (if you have a cart count element)
+                if (data.cartItemCount) {
+                    const cartCountElements = document.querySelectorAll('.cart-count');
+                    cartCountElements.forEach(element => {
+                        element.textContent = data.cartItemCount;
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error adding item to cart:', error);
+                
+                // Show error message to user
+                alert('Failed to add item to cart. Please try again.');
+            });
+        }
+
+        function loadMoreProducts() {
+            const loadMoreBtn = document.getElementById('load-more-btn');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const productGrid = document.getElementById('product-grid');
+            
+            // Get current page from the button's data attribute
+            const currentPage = parseInt(loadMoreBtn.getAttribute('data-current-page'));
+            const nextPage = currentPage + 1;
+            
+            // Show loading spinner, hide button
+            loadMoreBtn.classList.add('d-none');
+            loadingSpinner.classList.remove('d-none');
+            
+            // Fetch more products
+            fetch(`/Home/LoadMoreProducts?page=${nextPage}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    // Append new products to the grid
+                    productGrid.insertAdjacentHTML('beforeend', html);
+                    
+                    // Update button's page attribute
+                    loadMoreBtn.setAttribute('data-current-page', nextPage);
+                    
+                    // Hide spinner
+                    loadingSpinner.classList.add('d-none');
+                    
+                    // Check if there are more products to load based on the data attribute
+                    const hasMoreProducts = html.includes('product-card');
+                    if (hasMoreProducts) {
+                        loadMoreBtn.classList.remove('d-none');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading more products:', error);
+                    loadingSpinner.classList.add('d-none');
+                    loadMoreBtn.classList.remove('d-none');
+                    alert('Failed to load more products. Please try again.');
+                });
+        }
+    </script>
+} 

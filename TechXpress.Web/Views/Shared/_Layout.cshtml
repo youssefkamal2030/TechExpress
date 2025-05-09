@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="description" content="TechXpress - Your one-stop shop for all tech products" />
+    <meta name="description" content="TechXpress - Your one-stop shop for technology products. Built on ASP.NET Core for a seamless shopping experience." />
     <meta name="author" content="TechXpress" />
     <title>@ViewData["Title"] - TechXpress</title>
     <!-- Favicon-->
@@ -12,10 +12,22 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet" />
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" />
     <!-- Core theme CSS (includes Bootstrap)-->
     <link href="~/css/styles.css" rel="stylesheet" />
     <!-- Custom CSS -->
     <link href="~/css/custom.css" rel="stylesheet" />
+    <!-- Home CSS -->
+    <link href="~/css/home.css" rel="stylesheet" />
+    
+    <!-- Custom page styles -->
+    @await RenderSectionAsync("Styles", required: false)
+
+    <meta property="og:title" content="TechXpress - Technology E-Commerce Platform" />
+    <meta property="og:description" content="Your one-stop shop for technology products. Built on ASP.NET Core for a seamless shopping experience." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
 </head>
 <body>
     <!-- Toast Notification -->
@@ -32,44 +44,52 @@
         </div>
     </div>
 
-    <nav class="navbar navbar-expand-lg navbar-dark">
-        <div class="container px-4 px-lg-5">
-            <a class="navbar-brand" asp-action="Index" asp-controller="Home">
-                <i class="bi bi-laptop me-2"></i>TechXpress
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
+    <!-- Display temporary messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Header -->
+    <header class="header">
+      <div class="container">
+        <div class="header-content">
+          <div class="logo">
+            <a asp-controller="Home" asp-action="Index">Tech<span>Xpress</span></a>
+          </div>
+
+          <!-- Desktop Navigation -->
+          <nav class="desktop-nav">
+            <a asp-controller="Product" asp-action="Index" class="nav-link">Products</a>
+            <a asp-controller="Product" asp-action="Index" class="nav-link">Categories</a>
+            <a asp-controller="Product" asp-action="Index" asp-route-featured="true" class="nav-link">Deals</a>
+            <a href="#" class="nav-link">Support</a>
+          </nav>
+
+          <div class="desktop-actions">
+            <div class="search-container">
+              <form asp-controller="Product" asp-action="Index" method="get">
+                @Html.AntiForgeryToken()
+                <input type="text" name="searchTerm" placeholder="Search products" class="search-input">
+                <button type="submit" class="search-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
             </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-4">
-                    <li class="nav-item">
-                        <a class="nav-link" asp-action="Index" asp-controller="Home">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="#!">About</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Shop</a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="#!">All Products</a></li>
-                            <li><hr class="dropdown-divider" /></li>
-                            <li><a class="dropdown-item" href="#!">Popular Items</a></li>
-                            <li><a class="dropdown-item" href="#!">New Arrivals</a></li>
-                        </ul>
-                    </li>
-                </ul>
-                <div class="d-flex align-items-center">
-                    <a class="btn btn-outline-light me-2" href="/Cart">
-                        <i class="bi-cart-fill me-1"></i>
-                        Cart
-                        <span class="badge bg-light text-dark ms-1 rounded-pill">
-                            @await Component.InvokeAsync("CartSummary")
-                        </span>
-                    </a>
+              </form>
+            </div>
                     @if (User.Identity.IsAuthenticated)
                     {
                         <div class="dropdown">
-                            <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="btn btn-outline dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-person-circle me-1"></i>@User.Identity.Name
                             </button>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
@@ -80,6 +100,7 @@
                                 }
                                 <li><a class="dropdown-item" href="/Account/Profile"><i class="bi bi-person me-2"></i>Profile</a></li>
                                 <li><a class="dropdown-item" href="/Order"><i class="bi bi-bag me-2"></i>Orders</a></li>
+                        <li><a class="dropdown-item" href="/Review/MyReviews"><i class="bi bi-star me-2"></i>My Reviews</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="/Account/Logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                             </ul>
@@ -87,66 +108,206 @@
                     }
                     else
                     {
-                        <a class="btn btn-outline-light me-2" href="/Account/Login">
-                            <i class="bi bi-box-arrow-in-right me-1"></i>Login
-                        </a>
-                        <a class="btn btn-light" href="/Account/Signup">
-                            <i class="bi bi-person-plus me-1"></i>Signup
-                        </a>
-                    }
+                <a asp-controller="Account" asp-action="Login" class="btn btn-outline">Log In</a>
+            }
+            <a asp-controller="Cart" asp-action="Index" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path></svg>
+              Cart
+              <span class="badge bg-light text-dark ms-1 rounded-pill cart-count">
+                @await Component.InvokeAsync("CartSummary")
+              </span>
+            </a>
                 </div>
+
+          <!-- Mobile Navigation Toggle -->
+          <div class="mobile-toggle">
+            <button id="menu-toggle" type="button" aria-expanded="false">
+              <svg class="menu-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line></svg>
+              <svg class="close-icon hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg>
+            </button>
             </div>
         </div>
+      </div>
+
+      <!-- Mobile Menu -->
+      <div class="mobile-menu hidden" id="mobile-menu">
+        <div class="container">
+          <div class="search-container mobile-search">
+            <form asp-controller="Product" asp-action="Index" method="get">
+              @Html.AntiForgeryToken()
+              <input type="text" name="searchTerm" placeholder="Search products" class="search-input">
+              <button type="submit" class="search-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+              </button>
+            </form>
+          </div>
+          <nav class="mobile-nav">
+            <a asp-controller="Product" asp-action="Index" class="nav-link">Products</a>
+            <a asp-controller="Product" asp-action="Index" class="nav-link">Categories</a>
+            <a asp-controller="Product" asp-action="Index" asp-route-featured="true" class="nav-link">Deals</a>
+            <a href="#" class="nav-link">Support</a>
     </nav>
-    <header class="bg-dark py-5">
-        <div class="container px-4 px-lg-5 my-5">
-            <div class="text-center text-white">
-                <h1 class="display-4 fw-bolder">Shop in style</h1>
-                <p class="lead fw-normal text-white-50 mb-0">Discover the latest tech products at amazing prices</p>
+          <div class="mobile-actions">
+            @if (User.Identity.IsAuthenticated)
+            {
+                <a asp-controller="Account" asp-action="Profile" class="btn btn-outline btn-full">My Account</a>
+                <a asp-controller="Account" asp-action="Logout" class="btn btn-outline btn-full">Logout</a>
+            }
+            else
+            {
+                <a asp-controller="Account" asp-action="Login" class="btn btn-outline btn-full">Log In</a>
+                <a asp-controller="Account" asp-action="Signup" class="btn btn-primary btn-full">Sign Up</a>
+            }
+            <a asp-controller="Cart" asp-action="Index" class="btn btn-primary btn-full">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"></circle><circle cx="19" cy="21" r="1"></circle><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path></svg>
+              View Cart
+            </a>
+          </div>
             </div>
         </div>
     </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+
+    <div>
+        <main role="main">
             @RenderBody()
         </main>
     </div>
-    <footer class="py-5">
+
+    <!-- Footer -->
+    <footer class="footer">
         <div class="container">
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    <h5 class="text-white mb-3">About TechXpress</h5>
-                    <p class="text-white-50">Your one-stop destination for all tech products. Quality products, competitive prices, and excellent customer service.</p>
+        <div class="footer-content">
+          <div class="footer-column">
+            <h3>TechXpress</h3>
+            <p>Your one-stop shop for high-quality technology products with exceptional service and competitive prices.</p>
+            <div class="social-links">
+              <a href="#" class="social-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+              </a>
+              <a href="#" class="social-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path></svg>
+              </a>
+              <a href="#" class="social-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"></line></svg>
+              </a>
+              <a href="#" class="social-link">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect width="4" height="12" x="2" y="9"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+              </a>
+            </div>
+          </div>
+          
+          <div class="footer-column">
+            <h3>Shop</h3>
+            <ul class="footer-links">
+              <li><a asp-controller="Product" asp-action="Index">All Products</a></li>
+              <li><a asp-controller="Product" asp-action="Index" asp-route-categoryId="1">Laptops</a></li>
+              <li><a asp-controller="Product" asp-action="Index" asp-route-categoryId="2">Smartphones</a></li>
+              <li><a asp-controller="Product" asp-action="Index" asp-route-categoryId="3">Computer Parts</a></li>
+              <li><a asp-controller="Product" asp-action="Index" asp-route-categoryId="4">Accessories</a></li>
+            </ul>
                 </div>
-                <div class="col-md-4 mb-4">
-                    <h5 class="text-white mb-3">Quick Links</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="/" class="text-white-50 text-decoration-none">Home</a></li>
-                        <li><a href="/Product" class="text-white-50 text-decoration-none">Products</a></li>
-                        <li><a href="/Order" class="text-white-50 text-decoration-none">My Orders</a></li>
-                        <li><a href="/Cart" class="text-white-50 text-decoration-none">Cart</a></li>
-                        <li><a href="#" class="text-white-50 text-decoration-none">About Us</a></li>
-                        <li><a href="#" class="text-white-50 text-decoration-none">Contact</a></li>
+          
+          <div class="footer-column">
+            <h3>Support</h3>
+            <ul class="footer-links">
+              <li><a href="#">Help Center</a></li>
+              <li><a asp-controller="Order" asp-action="Index">Order Status</a></li>
+              <li><a href="#">Returns & Refunds</a></li>
+              <li><a href="#">Contact Us</a></li>
+              <li><a href="#">Warranty Info</a></li>
                     </ul>
                 </div>
-                <div class="col-md-4 mb-4">
-                    <h5 class="text-white mb-3">Contact Us</h5>
-                    <ul class="list-unstyled text-white-50">
-                        <li><i class="bi bi-geo-alt me-2"></i>123 Tech Street, Tech City</li>
-                        <li><i class="bi bi-envelope me-2"></i>info@techxpress.com</li>
-                        <li><i class="bi bi-phone me-2"></i>+1 (555) 123-4567</li>
+          
+          <div class="footer-column">
+            <h3>Company</h3>
+            <ul class="footer-links">
+              <li><a href="#">About Us</a></li>
+              <li><a href="#">Careers</a></li>
+              <li><a href="#">Blog</a></li>
+              <li><a href="#">Press</a></li>
+              <li><a href="#">Partners</a></li>
                     </ul>
                 </div>
             </div>
-            <hr class="my-4 text-white-50">
-            <div class="text-center text-white-50">
-                <p class="mb-0">&copy; @DateTime.Now.Year TechXpress. All rights reserved.</p>
+        
+        <div class="footer-bottom">
+          <p>&copy; @DateTime.Now.Year TechXpress. All rights reserved.</p>
+          <div class="footer-legal">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Sitemap</a>
+          </div>
             </div>
         </div>
     </footer>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/scripts.js"></script>
     <script src="~/js/cart.js"></script>
+    
+    <script>
+        // CSRF token for AJAX requests
+        const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+        
+        // Toggle mobile menu functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Handle mobile menu toggle
+            const menuToggle = document.getElementById('menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuIcon = document.querySelector('.menu-icon');
+            const closeIcon = document.querySelector('.close-icon');
+            
+            if (menuToggle && mobileMenu) {
+                menuToggle.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('hidden');
+                    menuIcon.classList.toggle('hidden');
+                    closeIcon.classList.toggle('hidden');
+                    
+                    // Update aria-expanded attribute for accessibility
+                    const isExpanded = menuToggle.getAttribute('aria-expanded') === 'true';
+                    menuToggle.setAttribute('aria-expanded', !isExpanded);
+                });
+            }
+            
+            // Auto-hide alerts after 5 seconds
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(alert => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+        
+        // Function to add items to cart
+        function addToCart(productId, quantity) {
+            fetch('/Cart/AddToCart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': csrfToken
+                },
+                body: JSON.stringify({
+                    productId: productId,
+                    quantity: quantity
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Show toast notification
+                const toast = new bootstrap.Toast(document.getElementById('cartToast'));
+                toast.show();
+                
+                // Update cart count
+                const cartCountElements = document.querySelectorAll('.cart-count');
+                cartCountElements.forEach(element => {
+                    element.textContent = data.cartItemCount || '0';
+                });
+            })
+            .catch(error => console.error('Error adding item to cart:', error));
+        }
+    </script>
+    
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

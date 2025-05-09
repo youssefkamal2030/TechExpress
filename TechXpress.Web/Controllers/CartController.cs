@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using TechXpress.Models.Dto_s;
 using TechXpress.Models.entitis;
 using TechXpress.Services.Interfaces;
 
@@ -23,11 +24,39 @@ namespace TechXpress.Web.Controllers
             return View(cart);
         }
 
-        public async Task<IActionResult> AddToCart(int id, int quantity = 1)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddToCart([FromBody] CartItemDTO cartItem)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            await _cartService.AddToCartAsync(id, quantity, userId);
-            return RedirectToAction("Index", "Home"); 
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                await _cartService.AddToCartAsync(cartItem.ProductId, cartItem.Quantity, userId);
+                
+                var cartCount = await _cartService.GetCartCountAsync(userId);
+                
+                return Json(new { success = true, cartItemCount = cartCount });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // GET endpoint for AddToCart
+        public async Task<IActionResult> AddItem(int id, int quantity = 1)
+        {
+            try
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                await _cartService.AddToCartAsync(id, quantity, userId);
+                return RedirectToAction("Index", "Home");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+                return RedirectToAction("Index", "Home");
+            }
         }
 
         [HttpPost]

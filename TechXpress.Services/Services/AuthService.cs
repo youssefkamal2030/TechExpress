@@ -167,5 +167,69 @@ namespace TechXpress.Services.Services
 
             return true;
         }
+
+        // Profile management methods with AutoMapper
+        public async Task<ProfileDTO> GetUserProfileAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                throw new Exception("User not found");
+            }
+
+            // Use AutoMapper to map User to ProfileDTO
+            return _mapper.Map<ProfileDTO>(user);
+        }
+
+        public async Task<bool> UpdateUserProfileAsync(ProfileDTO profileDto)
+        {
+            var user = await _userManager.FindByIdAsync(profileDto.Id);
+            if (user == null)
+            {
+                throw new Exception("User not found");
+            }
+
+            // Store original email to check if it changed
+            var originalEmail = user.Email;
+
+            // Use AutoMapper to map ProfileDTO to User
+            _mapper.Map(profileDto, user);
+
+            // Save changes
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                var errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new Exception($"Failed to update profile: {errorMessage}");
+            }
+
+            // If email was changed, update normalized email and set email confirmation to false
+            if (originalEmail != user.Email)
+            {
+                user.NormalizedEmail = _userManager.NormalizeEmail(user.Email);
+                user.EmailConfirmed = false;
+                await _userManager.UpdateAsync(user);
+            }
+
+            return true;
+        }
+
+        public async Task<bool> ChangePasswordAsync(string userId, string currentPassword, string newPassword)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                throw new Exception("User not found");
+            }
+
+            var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+            if (!result.Succeeded)
+            {
+                var errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new Exception($"Failed to change password: {errorMessage}");
+            }
+
+            return true;
+        }
     }
 }
